@@ -1,16 +1,16 @@
 Welcome to FatbotIRC!
 
-This bot is a hobby project of mine.
-This project is one of my first in Python(Wrote a chat server and client before this.)
+This bot is a hobby project of mine.  
+This project is one of my first in Python(Wrote a chat server and client before this.)  
 
-It's basically an event driven MVC python IRC bot.
+It's basically an event driven MVC python IRC bot.  
 
-I am focusing on trying to keep the bot modular and fitting into MVC-pattern.
-It should be easy adding a new module to the bot.
+I am focusing on trying to keep the bot modular and fitting into MVC-pattern.  
+It should be easy adding a new module to the bot.  
 
-The bot will send out events for everything that happens with the appropriate information, currently:
+The bot will send out events for everything that happens with the appropriate information, currently:  
 
-PRIVMSG
+PRIVMSG  
   This event gets sent out when a PRIVMSG is received.
   It is sent out with the data: soucre, channel, message, command, parameters.
 PING
