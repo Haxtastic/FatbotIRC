@@ -43,7 +43,7 @@ class EventManager:
 		while i < len(self.eventQueue):
 			event = self.eventQueue[i]
 			for listener in self.listeners.keys():
-				listener.notify(event)
+				thread.start_new_thread(listener.notify, (event, ))
 			i += 1
 			if self.listenersToAdd or self.listenersToRemove:
 				self.update_listeners()
