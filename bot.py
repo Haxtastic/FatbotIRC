@@ -46,3 +46,4 @@ class Bot:
 				self.start()
 		if isinstance(event, PrivmsgEvent):
 			self.prase_privmsg(event)
+			

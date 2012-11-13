@@ -3,6 +3,7 @@ import struct
 class NetworkMessage:
 	def __init__(self):
 		self.reset()
+		self.silent = False
 		return
 		
 	def reset(self):
