@@ -25,11 +25,6 @@ class Connection:
 		self.netcontrol = NetworkController(self.evManager)
 		self.connectionLock = thread.allocate_lock()
 		
-	def open_new_thread(self, function, args, name=""):
-		#self.threads+=1
-		#print "Open " + name + " #" + str(self.threads)
-		thread.start_new_thread(function, args)
-		
 	def connect(self, username):
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.socket.connect((self.host, self.port))
