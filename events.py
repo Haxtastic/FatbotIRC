@@ -38,7 +38,7 @@ class SendPrivmsgEvent(Event):
 		self.message = message
 		
 class PingEvent(Event):
+	silent = True
 	def __init__(self):
 		self.name = "PING Event"
-		silent = True
 		
