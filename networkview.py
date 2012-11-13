@@ -34,6 +34,7 @@ class NetworkView():
 		
 	def ping(self):
 		self.msg.buffer = "PONG :" + self.connection.host
+		self.msg.silent = True
 		self.connection.send(self.msg)
 
 	#----------------------------------------------------------------------
