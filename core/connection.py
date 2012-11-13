@@ -69,10 +69,10 @@ class Connection:
 		return
 		
 	def send(self, msg):
-		#self.connectionLock.acquire()
+		self.connectionLock.acquire()
 		if self.closeState is Connection.CLOSE_STATE_CLOSING:
 			#if not closingConnection():
-			#self.connectionLock.release()
+			self.connectionLock.release()
 			return False
 		if self.pendingWrite is 0:
 			self.netview.on_send_message(msg)
@@ -80,7 +80,7 @@ class Connection:
 		else:
 			pass
 			
-		#self.connectionLock.release()
+		self.connectionLock.release()
 		return True
 			
 	def internal_send(self, msg):
