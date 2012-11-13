@@ -8,7 +8,6 @@ class NetworkController():
 		
 	def on_recv_message(self, msg):
 		msg.strip_message()
-		print msg.buffer
 		self.prase_packet(msg)
 		return 0
 		
@@ -18,6 +17,7 @@ class NetworkController():
 		if parameters[0] == "PING":
 			self.evManager.post(PingEvent())
 			return
+		print recv.buffer
 		if parameters[0] == "":
 			return
 		parameters[0] = parameters[0].split(":")[1]  # Get rid of the : at the start of the message
