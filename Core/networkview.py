@@ -28,13 +28,13 @@ class NetworkView():
 		self.msg.buffer = "JOIN " + channel
 		self.connection.send(self.msg)
 		
-	def send_message(self, channel, message):
-		self.msg.buffer = "PRIVMSG %s :%s" % (channel, message)
+	def send_message(self, dest, message):
+		self.msg.buffer = "PRIVMSG %s :%s" % (dest, message)
 		self.connection.send(self.msg)
 		
 	def ping(self):
 		self.msg.buffer = "PONG :" + self.connection.host
-		self.msg.silent = True
+		self.msg.silent = False
 		self.connection.send(self.msg)
 
 	#----------------------------------------------------------------------
@@ -46,4 +46,4 @@ class NetworkView():
 		elif isinstance(event, JoinEvent):
 			self.join_channel(event.channel)
 		elif isinstance(event, SendPrivmsgEvent):
-			self.send_message(event.channel, event.message)
+			self.send_message(event.dest, event.message)

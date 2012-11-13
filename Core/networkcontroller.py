@@ -13,18 +13,17 @@ class NetworkController():
 		
 	def prase_packet(self, recv):
 		#source, command, body
-		parameters = recv.buffer.split(" ", 3)
-		if parameters[0] == "PING":
-			self.evManager.post(PingEvent())
-			return
 		print recv.buffer
-		if parameters[0] == "":
-			return
-		parameters[0] = parameters[0].split(":")[1]  # Get rid of the : at the start of the message
+		parameters = recv.buffer.split(" ", 3)
+		if parameters[0].find(":") != -1:
+			parameters[0] = parameters[0].split(":")[1]  # Get rid of the : at the start of the message
 		#if parameters[0] != config.owner:  # If owner didn't send the message, discard
 		#	return
-		if parameters[1] == "PRIVMSG":  # Source, channel, message
+		if parameters[0] == "PING":
+			self.evManager.post(PingEvent())
+		elif parameters[1] == "PRIVMSG":  # Source, channel, message
 			self.prase_privmsg(parameters[0], parameters[2], parameters[3])
+		return
 			
 	def prase_privmsg(self, source, channel, message):
 		# :Kek!Keke@somekind.ofspecial.mask PRIVMSG Fatbot :Hey

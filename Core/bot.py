@@ -1,8 +1,10 @@
 import thread
 from connection import Connection
 from events import *
-import random
-import time
+import os, sys
+lib_path = os.path.abspath(os.path.join(".."))
+sys.path.append(lib_path)
+from moduleloader import load_modules
 
 class Bot:
 	STATE_PREPARING = 'preparing'
@@ -23,27 +25,11 @@ class Bot:
 	def start(self):
 		server = Connection(self.ip, self.port, self.evManager)
 		thread.start_new_thread(server.connect, (self.name,))
-			
-		self.state = Bot.STATE_RUNNING
-		
-	def prase_privmsg(self, event):
-		source = event.source
-		channel = event.channel
-		message = event.message
-		command = event.command
-		parameters = event.parameters
-		
-		if command == "join": #Channel
-			self.evManager.post(JoinEvent(parameters))
-		if command == "send": #Channel, message
-			parameters = parameters.split(" ", 1)
-			self.evManager.post(SendPrivmsgEvent(parameters[0], parameters[1]))
-	
+		self.modules = load_modules(self.evManager)
+		self.state = Bot.STATE_RUNNING	
 
 	def notify(self, event):
 		if isinstance(event, TickEvent):
 			if(self.state == Bot.STATE_PREPARING):
 				self.start()
-		if isinstance(event, PrivmsgEvent):
-			self.prase_privmsg(event)
 			

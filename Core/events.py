@@ -30,11 +30,10 @@ class JoinEvent(Event):
 		self.name = "JOIN event"
 		self.channel = channel
 
-		
 class SendPrivmsgEvent(Event):
-	def __init__(self, channel, message):
+	def __init__(self, dest, message):
 		self.name = "Send PRIVMSG Event"
-		self.channel = channel
+		self.dest = dest
 		self.message = message
 		
 class PingEvent(Event):
