@@ -1,0 +1,4 @@
+Guess number
+Trivia
+Black jack
+Mastermind
