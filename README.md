@@ -1,4 +1,4 @@
-Welcome to FatbotIRC!
+Welcome to Fatbot Slim for IRC!
 
 This bot is a hobby project of mine.  
 This project is one of my first in Python(Wrote a chat server and client before this.)  
