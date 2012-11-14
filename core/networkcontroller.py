@@ -20,6 +20,8 @@ class NetworkController():
 			parameters[0] = parameters[0].split(":")[1]  # Get rid of the : at the start of the message
 		if parameters[0] == "PING":
 			self.evManager.post(PingEvent())
+		elif parameters[0] == "ERROR":
+			return
 		elif parameters[1] == "PRIVMSG":  # Source, channel, message
 			self.evManager.post(PrivmsgEvent(parameters[0], parameters[2], parameters[3]))
 			
