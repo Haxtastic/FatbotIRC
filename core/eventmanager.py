@@ -1,9 +1,9 @@
 from events import *
 import thread
+from weakref import WeakKeyDictionary
 
 class EventManager:
 	def __init__(self):
-		from weakref import WeakKeyDictionary
 		self.listeners = WeakKeyDictionary()
 		self.eventQueue = []
 		self.nextQueue = []
@@ -31,13 +31,7 @@ class EventManager:
 			self.consume_event_queue()
 		else:
 			if not event.silent:
-				#print "event add to console"
 				self.post(ConsoleEvent(event.name))
-				
-	def post_next(self, event):
-		self.nextQueue.append(event)
-		if not event.silent:
-				print("Next", event.name)
 	
 	def consume_event_queue(self):
 		i = 0
@@ -48,5 +42,4 @@ class EventManager:
 			i += 1
 			if self.listenersToAdd or self.listenersToRemove:
 				self.update_listeners()
-		self.eventQueue = self.nextQueue
-		self.nextQueue = []
+		self.eventQueue = []
