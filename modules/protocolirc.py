@@ -41,7 +41,9 @@ class protocolIRC():
 				self.read_config()
 				
 	def is_master(self, source):
+		print source
 		for master in self.masters:
+			print master
 			if source.lower() == master.lower():
 				return True
 		return False
@@ -49,7 +51,5 @@ class protocolIRC():
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()
 		self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
-		self.masters = self.config.get("protocolirc", "masters")
-		if self.masters.find(",") != -1:
-			self.masters = self.masters.strip().split(",")
+		self.masters = self.config.get("protocolirc", "masters").strip().split(",")
 			
