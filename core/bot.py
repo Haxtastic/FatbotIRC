@@ -38,6 +38,9 @@ class Bot:
 				self.start()
 		elif isinstance(event, ConnectedEvent):
 			self.evManager.post(LoginEvent(self.name))
+		elif isinstance(event, ReloadconfigEvent):
+			if event.module == "core" or event.module == "all":
+				self.read_config()
 				
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()

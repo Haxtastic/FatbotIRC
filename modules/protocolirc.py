@@ -18,21 +18,27 @@ class protocolIRC():
 		# :Kek!Keke@somekind.ofspecial.mask PRIVMSG Fatbot :Hey
 		if message.find(" ") == -1 or source != self.master:  # If no parameters, discard
 			return
-		command = message.split(" ", 1)
-		parameters = command[1]
+		command = message.split(" ")
+		parameters = command[1:]
 		command = command[0].split(":")[1].lower()  # Get rid of the : at start and no caps
 		
 		if command == "join":  # channel
-			self.evManager.post(JoinEvent(parameters))
+			self.evManager.post(JoinEvent(parameters[0]))
 		elif command == "part":  # channel
-			self.evManager.post(PartEvent(parameters))
+			self.evManager.post(PartEvent(parameters[0]))
 		elif command == "send":  # destination, message
-			parameters = parameters.split(" ", 1)
+			#parameters = parameters.split(" ", 1)
 			self.evManager.post(SendPrivmsgEvent(parameters[0], parameters[1]))
+		elif command == "reloadconfig":  # list of modules to reload
+			for module in parameters:
+				self.evManager.post(ReloadconfigEvent(module))
 		
 	def notify(self, event):
 		if isinstance(event, PrivmsgEvent):
 			self.prase_privmsg(event)
+		elif isinstance(event, ReloadconfigEvent):
+			if event.module == "protocolirc" or event.module == "all":
+				self.read_config()
 			
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()
