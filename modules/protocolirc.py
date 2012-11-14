@@ -51,5 +51,5 @@ class protocolIRC():
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()
 		self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
-		self.masters = self.config.get("protocolirc", "masters").strip().split(",")
+		self.masters = self.config.get("protocolirc", "masters").strip(" ").split(",")
 			
