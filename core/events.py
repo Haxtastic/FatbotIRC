@@ -53,3 +53,8 @@ class ConsoleEvent(Event):
 	def __init__(self, text):
 		self.name = "Console Event"
 		self.text = text
+		
+class ReloadconfigEvent(Event):
+	def __init__(self, module):
+		self.name = "Reloadconfig Event"
+		self.module = module.lower()
