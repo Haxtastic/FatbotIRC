@@ -23,9 +23,13 @@ class NetworkView():
 		self.connection.send(self.msg)
 		
 	def join_channel(self, channel):
-		if channel.find("#") == -1:
-			channel = "#" + channel
+		channel = self.is_channel(channel)
 		self.msg.buffer = "JOIN " + channel
+		self.connection.send(self.msg)
+		
+	def part_channel(self, channel):
+		channel = self.is_channel(channel)
+		self.msg.buffer = "PART " + channel
 		self.connection.send(self.msg)
 		
 	def send_message(self, dest, message):
@@ -36,6 +40,11 @@ class NetworkView():
 		self.msg.buffer = "PONG :" + self.connection.host
 		self.msg.silent = False
 		self.connection.send(self.msg)
+		
+	def is_channel(self, channel):
+		if channel.find("#") == -1:
+			channel = "#" + channel
+		return channel
 
 	#----------------------------------------------------------------------
 	def notify(self, event):
@@ -45,5 +54,7 @@ class NetworkView():
 			self.ping()
 		elif isinstance(event, JoinEvent):
 			self.join_channel(event.channel)
+		elif isinstance(event, PartEvent):
+			self.part_channel(event.channel)
 		elif isinstance(event, SendPrivmsgEvent):
 			self.send_message(event.dest, event.message)
