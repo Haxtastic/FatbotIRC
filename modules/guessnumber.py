@@ -16,21 +16,15 @@ class GuessnumberManager():
 		
 	def prase_privmsg(self, event):
 		nick, source = event.source.split("!")
-		print nick
-		print source
 		channel = event.channel
 		message = event.message
-		
 		if channel[0] != "#":
 			channel = nick
 		
 		if self.games.has_key(source):
 			self.games[source].process(event.message.split(":")[1], channel, nick)
 			return
-		
-		if message.find(" ") == -1:  # If no parameters, discard
-			if command == "guessnumber":
-				self.evManager.post(SendPrivmsgEvent(channel, self.errormessage % (nick,)))
+			
 		command = message.split(" ")
 		parameters = command[1:]
 		command = command[0].split(":")[1].lower()  # Get rid of the : at start and no caps
@@ -44,6 +38,7 @@ class GuessnumberManager():
 				max = int(parameters[1])
 			except ValueError:
 				self.evManager.post(SendPrivmsgEvent(channel, self.errormessage % (nick,)))
+				return
 				
 			self.games[source] = Guessnumber(min, max, self.evManager, channel, nick)
 			self.evManager.post(SendPrivmsgEvent(channel, self.startmessage % (nick, )))
@@ -77,26 +72,32 @@ class Guessnumber():
 		self.evManager = evManager
 		self.state = Guessnumber.STATE_RUNNING
 		self.number = random.randint(min, max)
-		self.channel = channel
+		self.realchannel = channel
 		self.nick = nick
+		if self.realchannel[0] != "#":
+			self.channel = nick
+		else:
+			self.channel = self.realchannel
 		print self.number
 		
 	def process(self, message, channel, nick):
-		if (self.channel[0] == "#" and channel != self.channel) or (self.channel[0] == "#" and channel[0] != "#") or (self.channel[0] != "#" and channel[0] == "#"):
+		if channel != self.realchannel:
 			return
+			
 		try:
 			print message
 			value = int(message)
 		except ValueError:
-			self.evManager.post(SendPrivmsgEvent(channel, "Please enter a number."))
+			self.evManager.post(SendPrivmsgEvent(self.channel, "Please enter a number."))
 			return
+			
 		if value == self.number:  # game won
-			self.evManager.post(SendPrivmsgEvent(channel, "Congratulations " + nick + " you have guessed the right number and therefore won the game!"))
+			self.evManager.post(SendPrivmsgEvent(self.channel, "Congratulations " + nick + " you have guessed the right number and therefore won the game!"))
 			self.state = Guessnumber.STATE_STOPPED
 		elif value > self.number:  # need to guess lower
-			self.evManager.post(SendPrivmsgEvent(channel, nick + ": The number I'm looking for is lower."))
+			self.evManager.post(SendPrivmsgEvent(self.channel, nick + ": The number I'm thinking of is lower."))
 		elif value < self.number:  # need to guess higher
-			self.evManager.post(SendPrivmsgEvent(channel, nick + ": The number I'm looking for is higher."))
+			self.evManager.post(SendPrivmsgEvent(self.channel, nick + ": The number I'm thinking of is higher."))
 			
 			
 			
