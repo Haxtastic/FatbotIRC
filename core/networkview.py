@@ -23,12 +23,12 @@ class NetworkView():
 		self.connection.send(self.msg)
 		
 	def join_channel(self, channel):
-		channel = self.is_channel(channel)
+		channel = self.make_channel(channel)
 		self.msg.buffer = "JOIN " + channel
 		self.connection.send(self.msg)
 		
 	def part_channel(self, channel):
-		channel = self.is_channel(channel)
+		channel = self.make_channel(channel)
 		self.msg.buffer = "PART " + channel
 		self.connection.send(self.msg)
 		
@@ -41,8 +41,8 @@ class NetworkView():
 		self.msg.silent = False
 		self.connection.send(self.msg)
 		
-	def is_channel(self, channel):
-		if channel.find("#") == -1:
+	def make_channel(self, channel):
+		if channel[0] != "#":
 			channel = "#" + channel
 		return channel
 
