@@ -16,7 +16,7 @@ class protocolIRC():
 		message = event.message
 		
 		# :Kek!Keke@somekind.ofspecial.mask PRIVMSG Fatbot :Hey
-		if message.find(" ") == -1 or source != self.master:  # If no parameters, discard
+		if message.find(" ") == -1 or not self.is_master(source.split("!")[1]):  # If no parameters or not master, discard
 			return
 		command = message.split(" ")
 		parameters = command[1:]
@@ -39,9 +39,17 @@ class protocolIRC():
 		elif isinstance(event, ReloadconfigEvent):
 			if event.module == "protocolirc" or event.module == "all":
 				self.read_config()
+				
+	def is_master(self, source):
+		for master in self.masters:
+			if source.lower() == master.lower():
+				return True
+		return False
 			
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()
 		self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
-		self.master = 		self.config.get("protocolirc", "master")
+		self.masters = self.config.get("protocolirc", "masters")
+		if self.masters.find(",") != -1:
+			self.masters = self.masters.strip().split(",")
 			
