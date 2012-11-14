@@ -12,7 +12,7 @@ def main():
 	#console = ConsoleView(eventManager)
 	#chatView = ChatView(eventManager)
 	#chatControl = ChatController(eventManager)
-	bot = Bot("Fatbot", "irc.tweaknet.org", 6667, eventManager)
+	bot = Bot(eventManager)
 	spinner.run()
 
 if __name__ == '__main__':

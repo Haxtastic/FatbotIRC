@@ -12,7 +12,7 @@ class NetworkView():
 		
 	def on_send_message(self, msg):
 		if msg.silent is False:
-			print msg.buffer
+			self.evManager.post(ConsoleEvent(msg.buffer))
 		msg.end_message()
 		return 0
 		
@@ -39,7 +39,7 @@ class NetworkView():
 
 	#----------------------------------------------------------------------
 	def notify(self, event):
-		if isinstance(event, ConnectedEvent):
+		if isinstance(event, LoginEvent):
 			self.connect(event.username)
 		elif isinstance(event, PingEvent):
 			self.ping()

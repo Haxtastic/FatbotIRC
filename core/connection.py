@@ -25,12 +25,16 @@ class Connection:
 		self.netcontrol = NetworkController(self.evManager)
 		self.connectionLock = thread.allocate_lock()
 		
-	def connect(self, username):
+	def connect(self):
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		#self.evManager.post(ConsoleEvent("Connecting"))
+		#print "Connecting"
 		self.socket.connect((self.host, self.port))
+		#self.evManager.post(ConsoleEvent("Connected"))
+		#print "Connected"
 		self.pendingRead+=1
 		thread.start_new_thread(self.prase_header, ())
-		self.evManager.post(ConnectedEvent(username))
+		self.evManager.post(ConnectedEvent())
 		return
 	
 	def prase_header(self):
@@ -38,6 +42,9 @@ class Connection:
 			if not self.closingConnection():
 				self.connectionLock.release()
 			return
+		
+		#print "prase_header"
+		#self.evManager.post(ConsoleEvent("prase_header"))
 			
 		self.msg.buffer = self.safe_recv(2048)	#ACQUIRE PACKET BRO
 		self.connectionLock.acquire()			#ACQUIRE LOCK
@@ -46,6 +53,7 @@ class Connection:
 		self.connectionLock.release()
 		
 	def prase_packet(self):
+		#print "prase_packet"
 		self.connectionLock.acquire()
 		self.pendingRead-=1
 		if self.closeState is Connection.CLOSE_STATE_CLOSING:
@@ -99,7 +107,7 @@ class Connection:
 	def close_connection_task(self):
 		self.connectionLock.acquire()
 		if self.closeState is not Connection.CLOSE_STATE_REQUESTED:
-			print "Error: [Connection::close_connection_task] closeState = " + str(self.closeState)
+			self.post(ConsoleEvent("Error: [Connection::close_connection_task] closeState = " + str(self.closeState)))
 			self.connectionLock.release()
 			return
 		self.closeState = Connection.CLOSE_STATE_CLOSING
@@ -137,6 +145,6 @@ class Connection:
 			return self.socket.recv(size)
 		except socket.error, msg:
 			self.close_connection()
-			print "Connection closed"
+			self.post(ConsoleEvent("Connection closed"))
 		return False
 			

@@ -31,7 +31,8 @@ class EventManager:
 			self.consume_event_queue()
 		else:
 			if not event.silent:
-				print(event.name)
+				#print "event add to console"
+				self.post(ConsoleEvent(event.name))
 				
 	def post_next(self, event):
 		self.nextQueue.append(event)

@@ -12,22 +12,29 @@ class QuitEvent(Event):
 		self.name = "Program Quit"
 		
 class ConnectedEvent(Event):
-	def __init__(self, username):
+	def __init__(self):
 		self.name = "Connected Event"
+		
+class LoginEvent(Event):
+	def __init__(self, username):
+		self.name = "Login Event"
 		self.username = username
 		
 class PrivmsgEvent(Event):
-	def __init__(self, source, channel, message, command, parameters):
+	def __init__(self, source, channel, message):
 		self.name = "PRIVMSG Event"
 		self.source = source
 		self.channel = channel
 		self.message = message
-		self.command = command
-		self.parameters = parameters
 		
 class JoinEvent(Event):
 	def __init__(self, channel):
 		self.name = "JOIN event"
+		self.channel = channel
+		
+class PartEvent(Event):
+	def __init__(self, channel):
+		self.name = "PART event"
 		self.channel = channel
 
 class SendPrivmsgEvent(Event):
@@ -41,3 +48,8 @@ class PingEvent(Event):
 	def __init__(self):
 		self.name = "PING Event"
 		
+class ConsoleEvent(Event):
+	silent = True
+	def __init__(self, text):
+		self.name = "Console Event"
+		self.text = text

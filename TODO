@@ -1,9 +1,1 @@
-Create a config file for bot.py, username, ip, port etc.
-
-Move away username from connect function in connection.py
-
-Create console MVC
-
-Move away command and parameters from networkcontroller, removing the discard on no parameters
-
 Generally write more safe code, error checking etc.
