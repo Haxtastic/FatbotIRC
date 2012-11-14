@@ -9,6 +9,7 @@ sys.path.append(lib_path)
 from moduleloader import load_modules
 
 class Bot:
+	STATE_STOPPED = 'stopped'
 	STATE_PREPARING = 'preparing'
 	STATE_RUNNING = 'running'
 	STATE_PAUSED = 'paused'
@@ -20,12 +21,12 @@ class Bot:
 		#self.name = name
 		#self.ip = ip
 		#self.port = port
-		self.state = Bot.STATE_PREPARING
+		self.state = Bot.STATE_STOPPED
 
 
 	def start(self):
+		self.state = Bot.STATE_PREPARING
 		self.console = ConsoleView(self.evManager)
-		self.evManager.post(ConsoleEvent("Starting up..."))
 		self.server = Connection(self.ip, self.port, self.evManager)
 		thread.start_new_thread(self.server.connect, ())
 		self.modules = load_modules(self.evManager)
@@ -33,7 +34,7 @@ class Bot:
 
 	def notify(self, event):
 		if isinstance(event, TickEvent):
-			if(self.state == Bot.STATE_PREPARING):
+			if(self.state == Bot.STATE_STOPPED):
 				self.start()
 		elif isinstance(event, ConnectedEvent):
 			self.evManager.post(LoginEvent(self.name))
