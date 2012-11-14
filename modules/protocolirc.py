@@ -16,7 +16,7 @@ class protocolIRC():
 		message = event.message
 		
 		# :Kek!Keke@somekind.ofspecial.mask PRIVMSG Fatbot :Hey
-		if message.find(" ") == -1 or not self.is_master(source.split("!")[1]):  # If no parameters or not master, discard
+		if channel[0] == "#" or message.find(" ") == -1 or not self.is_master(source.split("!")[1]):  # If no parameters or not master, discard
 			return
 		command = message.split(" ")
 		parameters = command[1:]
@@ -27,8 +27,11 @@ class protocolIRC():
 		elif command == "part":  # channel
 			self.evManager.post(PartEvent(parameters[0]))
 		elif command == "send":  # destination, message
-			#parameters = parameters.split(" ", 1)
-			self.evManager.post(SendPrivmsgEvent(parameters[0], parameters[1]))
+			text = ""
+			for word in parameters[1:]:
+				text += "%s " % (word, )
+			text.strip()
+			self.evManager.post(SendPrivmsgEvent(parameters[0], text))
 		elif command == "reloadconfig":  # list of modules to reload
 			for module in parameters:
 				self.evManager.post(ReloadconfigEvent(module))
@@ -41,9 +44,7 @@ class protocolIRC():
 				self.read_config()
 				
 	def is_master(self, source):
-		print source
 		for master in self.masters:
-			print master
 			if source.lower() == master.lower():
 				return True
 		return False
@@ -51,5 +52,5 @@ class protocolIRC():
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()
 		self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
-		self.masters = self.config.get("protocolirc", "masters").strip(" ").split(",")
+		self.masters = self.config.get("protocolirc", "masters").replace(" ", "").split(",")
 			
