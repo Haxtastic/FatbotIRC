@@ -27,11 +27,7 @@ class Connection:
 		
 	def connect(self):
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		#self.evManager.post(ConsoleEvent("Connecting"))
-		#print "Connecting"
 		self.socket.connect((self.host, self.port))
-		#self.evManager.post(ConsoleEvent("Connected"))
-		#print "Connected"
 		self.pendingRead+=1
 		thread.start_new_thread(self.prase_header, ())
 		self.evManager.post(ConnectedEvent())
@@ -42,9 +38,6 @@ class Connection:
 			if not self.closingConnection():
 				self.connectionLock.release()
 			return
-		
-		#print "prase_header"
-		#self.evManager.post(ConsoleEvent("prase_header"))
 			
 		self.msg.buffer = self.safe_recv(2048)	#ACQUIRE PACKET BRO
 		self.connectionLock.acquire()			#ACQUIRE LOCK
