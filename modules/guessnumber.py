@@ -18,10 +18,10 @@ class GuessnumberManager():
 		nick, source = event.source.split("!")
 		channel = event.channel
 		message = event.message
-		if channel[0] != "#":
+		if channel[0] != "#":  # if the message isn't from a channel, the channel is the message owners nick
 			channel = nick
 		
-		if self.games.has_key(source):
+		if self.games.has_key(source):  # if message owner is in a game, let the game process the info
 			self.games[source].process(event.message.split(":")[1], channel, nick)
 			return
 			
