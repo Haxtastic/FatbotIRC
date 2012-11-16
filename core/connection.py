@@ -48,14 +48,15 @@ class Connection:
 	def prase_packet(self):
 		#print "prase_packet"
 		self.connectionLock.acquire()
-		self.pendingRead-=1
 		if self.closeState is Connection.CLOSE_STATE_CLOSING:
 			if not closingConnection():
 				self.connectionLock.release()
 			return
-			
+		
 		if self.netcontrol:
 			self.netcontrol.on_recv_message(self.msg)
+		#else:
+		#	self.evManager.post(ConsoleEvent("Warning: [Connection::prase_packet] self.msg.buffer is empty."))
 			
 		self.msg.reset()
 		#new thread
@@ -100,7 +101,7 @@ class Connection:
 	def close_connection_task(self):
 		self.connectionLock.acquire()
 		if self.closeState is not Connection.CLOSE_STATE_REQUESTED:
-			self.post(ConsoleEvent("Error: [Connection::close_connection_task] closeState = " + str(self.closeState)))
+			self.evManager.post(ConsoleEvent("Error: [Connection::close_connection_task] closeState = " + str(self.closeState)))
 			self.connectionLock.release()
 			return
 		self.closeState = Connection.CLOSE_STATE_CLOSING
