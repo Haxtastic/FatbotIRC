@@ -74,6 +74,7 @@ class Guessnumber():
 		self.number = random.randint(min, max)
 		self.realchannel = channel
 		self.nick = nick
+		self.tries = 0
 		if self.realchannel[0] != "#":
 			self.channel = nick
 		else:
@@ -85,14 +86,17 @@ class Guessnumber():
 			return
 			
 		try:
-			print message
+			#print message
 			value = int(message)
 		except ValueError:
-			self.evManager.post(SendPrivmsgEvent(self.channel, "Please enter a number."))
+			#self.evManager.post(SendPrivmsgEvent(self.channel, "Please enter a number."))
 			return
+			
+		self.tries+=1
 			
 		if value == self.number:  # game won
 			self.evManager.post(SendPrivmsgEvent(self.channel, "Congratulations " + nick + " you have guessed the right number and therefore won the game!"))
+			self.evManager.post(SendPrivmsgEvent(self.channel, "It only took you %d tries!" % (self.tries, )))
 			self.state = Guessnumber.STATE_STOPPED
 		elif value > self.number:  # need to guess lower
 			self.evManager.post(SendPrivmsgEvent(self.channel, nick + ": The number I'm thinking of is lower."))
