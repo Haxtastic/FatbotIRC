@@ -26,9 +26,9 @@ JOIN
   This event is sent out when you tell the bot to join a channel.  
   It is sent out with the data: channel  
 
-PART
-  This event is sent out when you tell the bot to leave a channel.
-  It is sent out with the data: channel
+PART  
+  This event is sent out when you tell the bot to leave a channel.  
+  It is sent out with the data: channel  
   
   
   
