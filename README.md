@@ -3,9 +3,8 @@ Welcome to Fatbot Slim for IRC!
 This bot is a hobby project of mine.  
 This project is one of my first in Python(Wrote a chat server and client before this.)  
 
-It's basically an event driven MVC python IRC bot.  
+Tried to fit it into the MVC-pattern, but realized that I've made a huge mistake and will now continue with this junk.
 
-I am focusing on trying to keep the bot modular and fitting into MVC-pattern.  
 It should be easy adding a new module to the bot.  
   
 The bot will send out events for everything that happens with the appropriate information, currently:  
@@ -26,6 +25,10 @@ PING
 JOIN  
   This event is sent out when you tell the bot to join a channel.  
   It is sent out with the data: channel  
+
+PART
+  This event is sent out when you tell the bot to leave a channel.
+  It is sent out with the data: channel
   
   
   
