@@ -9,19 +9,25 @@ class NetworkController():
 	def on_recv_message(self, msg):
 		msg.strip_message()
 		self.prase_packet(msg)
-		return 0
 		
 	def prase_packet(self, recv):
 		#source, command, body
-		self.evManager.post(ConsoleEvent(recv.buffer))
+		self.evManager.post(ConsoleEvent("%s" % recv.buffer))
 		#print "recv.buffer"
 		parameters = recv.buffer.split(" ", 3)
 		if parameters[0].find(":") != -1:
 			parameters[0] = parameters[0].split(":")[1]  # Get rid of the : at the start of the message
 		if parameters[0] == "PING":
 			self.evManager.post(PingEvent())
+			return
 		elif parameters[0] == "ERROR":
 			return
+		if len(parameters) < 2:
+			try:
+				error = "Error: [NetworkController::prase_packet] parameters[0] = %s packet length = %d" % (parameters[0], recv.len)
+			except TypeError:
+				error = "Error: [NetworkController::prase_packet] TypeError when formating parameters string"
+			self.evManager.post(ConsoleEvent(error))
 		elif parameters[1] == "PRIVMSG":  # Source, channel, message
 			self.evManager.post(PrivmsgEvent(parameters[0], parameters[2], parameters[3]))
 			
