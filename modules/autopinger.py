@@ -24,7 +24,7 @@ class autoPinger():
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()
 		self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
-		self.timeout = self.config.getint("autopinger", "timeout")
+		self.timeout = self.config.getint("autopinger", "timeout") + 2
 			
 class evManager():
 	def post(self, event):
