@@ -6,4 +6,5 @@ def load_modules(evManager):
 	list.append(protocolirc.protocolIRC(evManager))
 	list.append(gamemanager.GameManager(evManager))
 	list.append(youtubehelper.youtubeHelper(evManager))
+	list.append(autopinger.autoPinger(evManager))
 	return list
