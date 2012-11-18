@@ -39,13 +39,14 @@ class Connection:
 		return
 	
 	def parse_header(self):
+		#
 		if self.closeState is Connection.CLOSE_STATE_CLOSING:
-			if not self.closingConnection():
-				self.connectionLock.release()
+			#if not self.closingConnection():
+				#self.connectionLock.release()
 			return
 			
 		self.msg.buffer = self.safe_recv(2048)	#ACQUIRE PACKET BRO
-		self.connectionLock.acquire()			#ACQUIRE LOCK
+		self.connectionLock.acquire()
 		self.pendingRead=-1
 		thread.start_new_thread(self.parse_packet, ())
 		self.connectionLock.release()
