@@ -12,7 +12,7 @@ class GameManager():
 		self.read_config()
 		self.games = {}
 		
-	def prase_privmsg(self, event):
+	def parse_privmsg(self, event):
 		nick, source = event.source.split("!")
 		channel = event.channel
 		message = event.message
@@ -32,7 +32,7 @@ class GameManager():
 			
 	def notify(self, event):
 		if isinstance(event, PrivmsgEvent):
-			self.prase_privmsg(event)
+			self.parse_privmsg(event)
 		elif isinstance(event, ReloadconfigEvent):
 			if event.module == "games" or event.module == "all":
 				self.read_config()

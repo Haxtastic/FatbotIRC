@@ -18,12 +18,12 @@ class youtubeHelper():
 		message = event.message
 		urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message)
 		for url in urls:
-			if url.find("youtube.com/watch"):
+			if url.find("youtube.com/watch") != -1:
 				url_data = urlparse.urlparse(url)
 				query = urlparse.parse_qs(url_data.query)
 				videoid = query["v"][0]
 				video = self.client.GetYouTubeVideoEntry(video_id=videoid)
-				title = "Youtube title: %s" % (video.media.title.text, )
+				title = "YouTube Title: %s | Viewed: %s times | Rating: %s" % (video.media.title.text, video.statistics.view_count, video.rating.average)
 				self.evManager.post(SendPrivmsgEvent(event.channel, title))
 				
 	def notify(self, event):

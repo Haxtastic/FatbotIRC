@@ -10,7 +10,7 @@ class protocolIRC():
 		self.evManager.register_listener(self)
 		self.read_config()
 		
-	def prase_privmsg(self, event):
+	def parse_privmsg(self, event):
 		source = event.source
 		channel = event.channel
 		message = event.message
@@ -38,7 +38,7 @@ class protocolIRC():
 		
 	def notify(self, event):
 		if isinstance(event, PrivmsgEvent):
-			self.prase_privmsg(event)
+			self.parse_privmsg(event)
 		elif isinstance(event, ReloadconfigEvent):
 			if event.module == "protocolirc" or event.module == "all":
 				self.read_config()

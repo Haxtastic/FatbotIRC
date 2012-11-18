@@ -8,9 +8,9 @@ class NetworkController():
 		
 	def on_recv_message(self, msg):
 		msg.strip_message()
-		self.prase_packet(msg)
+		self.parse_packet(msg)
 		
-	def prase_packet(self, recv):
+	def parse_packet(self, recv):
 		#source, command, body
 		self.evManager.post(ConsoleEvent("%s" % recv.buffer))
 		#print "recv.buffer"
@@ -24,9 +24,9 @@ class NetworkController():
 			return
 		if len(parameters) < 2:
 			try:
-				error = "Error: [NetworkController::prase_packet] parameters[0] = %s packet length = %d" % (parameters[0], recv.len)
+				error = "Error: [NetworkController::parse_packet] parameters[0] = %s" % parameters[0]
 			except TypeError:
-				error = "Error: [NetworkController::prase_packet] TypeError when formating parameters string"
+				error = "Error: [NetworkController::parse_packet] TypeError when formating parameters string"
 			self.evManager.post(ConsoleEvent(error))
 		elif parameters[1] == "PRIVMSG":  # Source, channel, message
 			self.evManager.post(PrivmsgEvent(parameters[0], parameters[2], parameters[3]))
