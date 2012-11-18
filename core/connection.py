@@ -1,5 +1,5 @@
 import thread
-import socket
+import socket, ssl
 from networkview import NetworkView
 from networkcontroller import NetworkController
 from networkmessage import NetworkMessage
@@ -24,16 +24,21 @@ class Connection:
 		self.netview = NetworkView(self, self.evManager)
 		self.netcontrol = NetworkController(self.evManager)
 		self.connectionLock = thread.allocate_lock()
+		self.ssl = None
 		
-	def connect(self):
+	def connect(self, use_ssl=False):
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.socket.connect((self.host, self.port))
+		if use_ssl:
+			self.ssl = ssl.wrap_socket(self.socket)
+			self.ssl.connect((self.host, self.port))
+		else:
+			self.socket.connect((self.host, self.port))
 		self.pendingRead+=1
-		thread.start_new_thread(self.prase_header, ())
+		thread.start_new_thread(self.parse_header, ())
 		self.evManager.post(ConnectedEvent())
 		return
 	
-	def prase_header(self):
+	def parse_header(self):
 		if self.closeState is Connection.CLOSE_STATE_CLOSING:
 			if not self.closingConnection():
 				self.connectionLock.release()
@@ -42,26 +47,25 @@ class Connection:
 		self.msg.buffer = self.safe_recv(2048)	#ACQUIRE PACKET BRO
 		self.connectionLock.acquire()			#ACQUIRE LOCK
 		self.pendingRead=-1
-		thread.start_new_thread(self.prase_packet, ())
+		thread.start_new_thread(self.parse_packet, ())
 		self.connectionLock.release()
 		
-	def prase_packet(self):
-		#print "prase_packet"
+	def parse_packet(self):
 		self.connectionLock.acquire()
 		if self.closeState is Connection.CLOSE_STATE_CLOSING:
 			if not closingConnection():
 				self.connectionLock.release()
 			return
 		
-		if self.netcontrol:
+		if self.netcontrol and self.msg.buffer != "":
 			self.netcontrol.on_recv_message(self.msg)
 		#else:
-		#	self.evManager.post(ConsoleEvent("Warning: [Connection::prase_packet] self.msg.buffer is empty."))
+			#self.evManager.post(ConsoleEvent("Warning: [Connection::parse_packet] self.msg.buffer is empty."))
 			
 		self.msg.reset()
 		#new thread
 		self.pendingRead+=1
-		thread.start_new_thread(self.prase_header, ())
+		thread.start_new_thread(self.parse_header, ())
 		self.connectionLock.release()
 		return
 		
@@ -111,7 +115,10 @@ class Connection:
 	def closing_connection(self):
 		if self.pendingWrite is 0 or self.writingError is True:
 			if not self.socketClosed:
-				self.socket.close()
+				if self.ssl:
+					self.ssl.close()
+				else:
+					self.socket.close()
 				self.socketClosed = True
 		
 			if self.pendingRead is 0:
@@ -130,13 +137,19 @@ class Connection:
 		position = 0
 		tries = 0
 		while position is not size:
-			sent = self.socket.send(msg.buffer[position:size])
+			if self.ssl:
+				sent = self.ssl.write(msg.buffer[position:size])
+			else:
+				sent = self.socket.send(msg.buffer[position:size])
 			position+=sent
 			#print position
 			
 	def safe_recv(self, size):
 		try:
-			return self.socket.recv(size)
+			if self.ssl:
+				return self.ssl.read(size)
+			else:
+				return self.socket.recv(size)
 		except socket.error, msg:
 			self.close_connection()
 			self.post(ConsoleEvent("Connection closed"))

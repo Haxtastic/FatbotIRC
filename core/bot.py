@@ -28,7 +28,7 @@ class Bot:
 		self.state = Bot.STATE_PREPARING
 		self.console = ConsoleView(self.evManager)
 		self.server = Connection(self.ip, self.port, self.evManager)
-		thread.start_new_thread(self.server.connect, ())
+		thread.start_new_thread(self.server.connect, (self.ssl, ))
 		self.modules = load_modules(self.evManager)
 		self.state = Bot.STATE_RUNNING
 
@@ -45,7 +45,8 @@ class Bot:
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()
 		self.config.read('config.cfg')
-		self.ip = 		self.config.get("Login", "ip")
-		self.name = 	self.config.get("Login", "name")
-		self.port = 	self.config.getint("Login", "port")
+		self.ip   =	self.config.get		("Connection", "ip")
+		self.name = self.config.get		("Connection", "name")
+		self.ssl  =	self.config.getint	("Connection", "ssl")
+		self.port = self.config.getint	("Connection", "port")
 			
