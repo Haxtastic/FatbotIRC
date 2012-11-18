@@ -1,5 +1,6 @@
 from events import *
 from networkmessage import NetworkMessage
+import time
 
 class NetworkView():
 
@@ -12,7 +13,8 @@ class NetworkView():
 		
 	def on_send_message(self, msg):
 		if msg.silent is False:
-			self.evManager.post(ConsoleEvent(msg.buffer))
+			y, m, d, h, m, s, wd, yd, isdst = time.localtime()
+			self.evManager.post(ConsoleEvent("%02d:%02d:%02d %s" % (h, m, s, msg.buffer)))
 		msg.end_message()
 		return 0
 		
@@ -45,6 +47,11 @@ class NetworkView():
 		if channel[0] != "#":
 			channel = "#" + channel
 		return channel
+		
+	def disconnect(self):
+		if self.connection is not False:
+			self.connection.close_connection()
+			self.connection = False
 
 	#----------------------------------------------------------------------
 	def notify(self, event):
