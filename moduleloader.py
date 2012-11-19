@@ -7,4 +7,6 @@ def load_modules(evManager):
 	list.append(gamemanager.GameManager(evManager))
 	list.append(youtubehelper.youtubeHelper(evManager))
 	list.append(autopinger.autoPinger(evManager))
+	list.append(performer.performer(evManager))
+	list.append(nickserv.nickserv(evManager))
 	return list
