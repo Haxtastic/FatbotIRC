@@ -38,13 +38,11 @@ class Connection:
 		self.evManager.post(ConnectedEvent())
 		return
 	
-	def parse_header(self):
-		#
-		if self.closeState is Connection.CLOSE_STATE_CLOSING:
+	def parse_header(self):			
+		if self.closeState is not Connection.CLOSE_STATE_NONE:
 			#if not self.closingConnection():
-				#self.connectionLock.release()
+			#self.connectionLock.release()
 			return
-			
 		self.msg.buffer = self.safe_recv(2048)	#ACQUIRE PACKET BRO
 		self.connectionLock.acquire()
 		self.pendingRead=-1
@@ -53,9 +51,9 @@ class Connection:
 		
 	def parse_packet(self):
 		self.connectionLock.acquire()
-		if self.closeState is Connection.CLOSE_STATE_CLOSING:
-			if not closingConnection():
-				self.connectionLock.release()
+		if self.closeState is not Connection.CLOSE_STATE_NONE:
+			#if not self.closingConnection():
+			self.connectionLock.release()
 			return
 		
 		if self.netcontrol and self.msg.buffer != "":
@@ -95,12 +93,12 @@ class Connection:
 		self.pendingWrite-=1
 		
 	def close_connection(self):
-		#self.connectionLock.acquire()
+		self.connectionLock.acquire()
 		if self.closeState is not Connection.CLOSE_STATE_NONE:
 			return
 		self.closeState = Connection.CLOSE_STATE_REQUESTED
 		thread.start_new_thread(self.close_connection_task, ())
-		#self.connectionLock.release()
+		self.connectionLock.release()
 		return
 		
 	def close_connection_task(self):
@@ -117,6 +115,8 @@ class Connection:
 		if self.pendingWrite is 0 or self.writingError is True:
 			if not self.socketClosed:
 				if self.ssl:
+					self.evManager.post(ConsoleEvent("Closing connection"))
+					self.ssl.shutdown(socket.SHUT_RDWR)
 					self.ssl.close()
 				else:
 					self.socket.close()
@@ -125,7 +125,7 @@ class Connection:
 			if self.pendingRead is 0:
 				self.connectionLock.release()
 				self.dead = True
-				print "disconnected"
+				self.evManager.post(ConsoleEvent("Connection closed"))
 				return True
 		return False
 			
@@ -153,6 +153,5 @@ class Connection:
 				return self.socket.recv(size)
 		except socket.error, msg:
 			self.close_connection()
-			self.post(ConsoleEvent("Connection closed"))
 		return False
 			
