@@ -48,8 +48,10 @@ class NetworkView():
 			channel = "#" + channel
 		return channel
 		
-	def disconnect(self):
+	def disconnect(self, message):
 		if self.connection is not False:
+			self.msg.buffer = "QUIT " + message
+			self.connection.send(self.msg)
 			self.connection.close_connection()
 			self.connection = False
 
@@ -65,3 +67,5 @@ class NetworkView():
 			self.part_channel(event.channel)
 		elif isinstance(event, SendPrivmsgEvent):
 			self.send_message(event.dest, event.message)
+		elif isinstance(event, DisconnectEvent):
+			self.disconnect(event.message)
