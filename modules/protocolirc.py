@@ -7,10 +7,13 @@ import ConfigParser
 class protocolIRC():
 	def __init__(self, evManager):
 		self.evManager = evManager
-		self.evManager.register_listener(self)
 		self.read_config()
+		self.started = False;
+		self.evManager.register_listener(self)
 		
 	def parse_privmsg(self, event):
+		if self.started == False:
+			return
 		source = event.source
 		channel = event.channel
 		message = event.message
@@ -49,7 +52,9 @@ class protocolIRC():
 		elif isinstance(event, ReloadconfigEvent):
 			if event.module == "protocolirc" or event.module == "all":
 				self.read_config()
-				
+		elif isinstance(event, WelcomeEvent):
+			self.started = True
+
 	def is_master(self, source):
 		for master in self.masters:
 			if source.lower() == master.lower():

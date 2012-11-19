@@ -25,20 +25,3 @@ class autoPinger():
 		self.config = ConfigParser.RawConfigParser()
 		self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
 		self.timeout = self.config.getint("autopinger", "timeout") + 2
-			
-class evManager():
-	def post(self, event):
-		print event.name
-		
-	def register_listener(self, list):
-		print "REGISTERD"
-		
-def main():
-	manager = evManager()
-	ping = autoPinger(manager)
-	ping.notify(TickEvent())
-	ping.notify(PingEvent())
-	ping.notify(TickEvent())
-	
-if __name__ == '__main__':
-	main()

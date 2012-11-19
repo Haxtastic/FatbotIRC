@@ -11,8 +11,11 @@ class GameManager():
 		self.evManager.register_listener(self)
 		self.read_config()
 		self.games = {}
+		self.started = False
 		
 	def parse_privmsg(self, event):
+		if self.started == False:
+			return
 		nick, source = event.source.split("!")
 		channel = event.channel
 		message = event.message
@@ -38,6 +41,8 @@ class GameManager():
 				self.read_config()
 		elif isinstance(event, TickEvent):
 			self.check_instances()
+		elif isinstance(event, WelcomeEvent):
+			self.started = True
 			
 			
 	def check_instances(self):

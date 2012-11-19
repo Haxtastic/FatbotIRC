@@ -14,9 +14,12 @@ class youtubeHelper():
 		self.read_config()
 		self.client = gdata.youtube.service.YouTubeService()
 		self.client.ssl = True
+		self.started = False
 		self.evManager.register_listener(self)
 		
 	def parse_privmsg(self, event):
+		if self.started == False:
+			return
 		message = event.message
 		urls = re.findall('(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message)
 		for url in urls:
@@ -37,6 +40,8 @@ class youtubeHelper():
 		elif isinstance(event, ReloadconfigEvent):
 			if event.module == "youtubehelper" or event.module == "all":
 				self.read_config()
+		elif isinstance(event, WelcomeEvent):
+			self.started = True
 			
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()
