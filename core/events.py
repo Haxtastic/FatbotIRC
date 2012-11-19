@@ -58,3 +58,8 @@ class ReloadconfigEvent(Event):
 	def __init__(self, module):
 		self.name = "Reloadconfig Event"
 		self.module = module.lower()
+		
+class DisconnectEvent(Event):
+	def __init__(self, message):
+		self.name = "Disconnect Event"
+		self.message = message
