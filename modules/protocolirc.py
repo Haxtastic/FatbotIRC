@@ -35,6 +35,13 @@ class protocolIRC():
 		elif command == "reloadconfig":  # list of modules to reload
 			for module in parameters:
 				self.evManager.post(ReloadconfigEvent(module))
+		elif command == "disconnect":
+			text = ""
+			for word in parameters:
+				text += "%s " % (word, )
+			text.strip()
+			self.evManager.post(DisconnectEvent(text))
+			return
 		
 	def notify(self, event):
 		if isinstance(event, PrivmsgEvent):
