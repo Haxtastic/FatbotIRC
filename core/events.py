@@ -63,3 +63,8 @@ class DisconnectEvent(Event):
 	def __init__(self, message):
 		self.name = "Disconnect Event"
 		self.message = message
+		
+class WelcomeEvent(Event):
+	def __init__(self, message):
+		self.name = "Welcome Event"
+		self.message = message
