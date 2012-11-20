@@ -33,5 +33,5 @@ PART
   
   
 You can create your own events by adding them to events.py  
-You can then sent out the event by registering a listener to the EventManager and posting the event.  
+You can then send out the event by registering a listener to the EventManager and posting the event.  
 How you do this can be viewed in the source of most files.  
