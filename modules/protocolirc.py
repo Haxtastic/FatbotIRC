@@ -14,12 +14,12 @@ class protocolIRC():
 	def parse_privmsg(self, event):
 		if self.started == False:
 			return
-		source = event.source
+		nick, source = event.source.split("!")
 		channel = event.channel
 		message = event.message
 		
 		# :Kek!Keke@somekind.ofspecial.mask PRIVMSG Fatbot :Hey
-		if channel[0] == "#" or message.find(" ") == -1 or not self.is_master(source.split("!")[1]):  # If no parameters or not master, discard
+		if channel[0] == "#" or message.find(" ") == -1 or not self.is_master(source):  # If no parameters or not master, discard
 			return
 		command = message.split(" ")
 		parameters = command[1:]
@@ -45,6 +45,7 @@ class protocolIRC():
 			text.strip()
 			self.evManager.post(DisconnectEvent(text))
 			return
+			
 		
 	def notify(self, event):
 		if isinstance(event, PrivmsgEvent):
