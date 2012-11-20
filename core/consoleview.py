@@ -1,5 +1,6 @@
 import thread
 from events import *
+import time
 
 class ConsoleView:
 	def __init__(self, evManager):
@@ -18,7 +19,8 @@ class ConsoleView:
 	def notify(self, event):
 		if isinstance(event, ConsoleEvent):
 			self.queueLock.acquire()
-			self.printQueue.append(event.text)
+			y, m, d, h, m, s, wd, yd, isdst = time.localtime()
+			self.printQueue.append("%02d:%02d:%02d %s" % (h, m, s, event.text))
 			self.queueLock.release()
 		elif isinstance(event, TickEvent):
 			self.consume_queue()
