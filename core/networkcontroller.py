@@ -1,6 +1,5 @@
 from events import *
 from networkmessage import NetworkMessage
-import time
 
 class NetworkController():
 	def __init__(self, evManager):
@@ -15,8 +14,6 @@ class NetworkController():
 		
 	def parse_packet(self, buffer):
 		#source, command, body
-		y, m, d, h, m, s, wd, yd, isdst = time.localtime()
-		self.evManager.post(ConsoleEvent("%02d:%02d:%02d %s" % (h, m, s, buffer)))
 		parameters = buffer.split(" ", 3)
 		if parameters[0].find(":") != -1:
 			parameters[0] = parameters[0].split(":")[1]  # Get rid of the : at the start of the message
@@ -24,7 +21,9 @@ class NetworkController():
 			self.evManager.post(PingEvent())
 			return
 		elif parameters[0] == "ERROR":
+			self.evManager.post(ConsoleEvent(buffer))
 			return
+		self.evManager.post(ConsoleEvent(buffer))
 		if len(parameters) < 2:
 			try:
 				error = "Error: [NetworkController::parse_packet] parameters[0] = %s" % parameters[0]
@@ -36,6 +35,7 @@ class NetworkController():
 			self.evManager.post(WelcomeEvent(parameters[3]))
 		elif parameters[1] == "PRIVMSG":  # Source, channel, message
 			self.evManager.post(PrivmsgEvent(parameters[0], parameters[2], parameters[3]))
+			
 
 	#----------------------------------------------------------------------
 	def notify(self, event):
