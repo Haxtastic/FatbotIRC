@@ -1,5 +1,10 @@
+"""
+A simple class to ease message output to the server.
+Basically just a wrapper for the output buffer.
+"""
 class NetworkMessage:
 	def __init__(self):
+		self.buffer = ""
 		self.reset()
 		self.silent = False
 		return

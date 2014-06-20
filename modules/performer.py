@@ -3,20 +3,19 @@ lib_path = os.path.abspath(os.path.join("..", "core"))
 sys.path.append(lib_path)
 from events import *
 import ConfigParser
+from weakboundmethod import WeakBoundMethod as Wbm
 
 class performer():
-	def __init__(self, evManager):
-		self.evManager = evManager
+	def __init__(self, ed):
+		self.ed = ed
 		self.read_config()
-		self.evManager.register_listener(self)
+		self._connections = [
+			self.ed.add(PerformEvent, Wbm(self.perform))
+		]
 		
-	def perform(self):
+	def perform(self, event):
 		for channel in self.channels:
-			self.evManager.post(JoinEvent(channel))
-		
-	def notify(self, event):
-		if isinstance(event, WelcomeEvent):
-			self.perform()
+			self.ed.post(JoinEvent(channel))
 			
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()

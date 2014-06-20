@@ -4,14 +4,18 @@ sys.path.append(lib_path)
 from events import *
 import ConfigParser
 from games import *
+from weakboundmethod import WeakBoundMethod as Wbm
 
-class GameManager():
-	def __init__(self, evManager):
-		self.evManager = evManager
-		self.evManager.register_listener(self)
+class gamemanager():
+	def __init__(self, ed):
+		self.ed = ed
 		self.read_config()
 		self.games = {}
 		self.started = False
+		self._connections = [
+			self.ed.add(PrivmsgEvent, Wbm(self.parse_privmsg)),
+			self.ed.add(TickEvent, Wbm(self.check_instances))
+		]
 		
 	def parse_privmsg(self, event):
 		if self.started == False:
@@ -31,21 +35,13 @@ class GameManager():
 		command = command[0].split(":")[1].lower()  # Get rid of the : at start and no caps
 		
 		if command == "guessnumber":				
-			self.games[source] = guessnumber.Guessnumber(self.evManager, channel, nick, parameters)
+			self.games[source] = guessnumber.Guessnumber(self.ed, channel, nick, parameters)
+	
+	def reload_config(self, event):
+		if event.module == "games" or event.module == "all":
+			self.read_config()
 			
-	def notify(self, event):
-		if isinstance(event, PrivmsgEvent):
-			self.parse_privmsg(event)
-		elif isinstance(event, ReloadconfigEvent):
-			if event.module == "games" or event.module == "all":
-				self.read_config()
-		elif isinstance(event, TickEvent):
-			self.check_instances()
-		elif isinstance(event, WelcomeEvent):
-			self.started = True
-			
-			
-	def check_instances(self):
+	def check_instances(self, event):
 		items = []
 		for source, game in self.games.iteritems():
 			if game.state == game.STATE_STOPPED:

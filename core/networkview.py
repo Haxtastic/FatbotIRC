@@ -1,43 +1,72 @@
-from events import *
+from events import LoginEvent, PingEvent, JoinEvent, PartEvent, SendPrivmsgEvent, SendCommandEvent, DisconnectEvent, ConsoleEvent, QuitEvent
 from networkmessage import NetworkMessage
+from weakboundmethod import WeakBoundMethod as Wbm
 
 class NetworkView():
+"""
+This is the class we use to handle all the output to the network.
+Events gets posted with their relevant parameters and this class handles them accordingly.
+All methods are pretty straight forward, they do as their named.
 
-	#----------------------------------------------------------------------
-	def __init__(self, connection, evManager):
+These methods can be executed by either the bot itself or by a master ordering it to.
+"""
+	def __init__(self, connection, ed):
 		self.connection = connection
-		self.evManager = evManager
-		self.evManager.register_listener(self)
+		self.ed = ed
 		self.msg = NetworkMessage()
+		self._connections = [
+			self.ed.add(LoginEvent, Wbm(self.connect)),
+			self.ed.add(PingEvent, Wbm(self.ping)),
+			self.ed.add(JoinEvent, Wbm(self.join_channel)),
+			self.ed.add(PartEvent, Wbm(self.part_channel)),
+			self.ed.add(SendPrivmsgEvent, Wbm(self.send_message_event)),
+			self.ed.add(SendCommandEvent, Wbm(self.send_command)),
+			self.ed.add(DisconnectEvent, Wbm(self.disconnect))
+		]
 		
-	def on_send_message(self, msg):
+	def send_message_event(self, event):
+		self.send_message(event.dest, event.message, event.master)
+		
+	def on_send_message(self, msg): # Called by instance owner(connection) every time a message is sent
 		if msg.silent is False:
-			self.evManager.post(ConsoleEvent("%s" %msg.buffer))
+			self.ed.post(ConsoleEvent(msg.buffer))
 		msg.end_message()
-		return 0
 		
-	def connect(self, username):
-		self.msg.buffer = "USER " + username + " * 8 :" + username + " sloffson"
+	def connect(self, event):
+		self.msg.buffer = "USER " + event.username + " * 8 :" + event.username + " sloffson"
 		self.connection.send(self.msg)
-		self.msg.buffer = "NICK " + username
+		self.msg.buffer = "NICK " + event.username
 		self.connection.send(self.msg)
 		
-	def join_channel(self, channel):
-		channel = self.make_channel(channel)
+	def join_channel(self, event):
+		channel = self.make_channel(event.channel)
 		self.msg.buffer = "JOIN " + channel
 		self.connection.send(self.msg)
+		if event.master != "":
+			self.send_message(event.master, "Joining channel '%s', master!" % (channel), "")
 		
-	def part_channel(self, channel):
-		channel = self.make_channel(channel)
+	def part_channel(self, event):
+		channel = self.make_channel(event.channel)
 		self.msg.buffer = "PART " + channel
 		self.connection.send(self.msg)
+		if event.master != "":
+			self.send_message(event.master, "Parting channel '%s', master!" % (channel), "")
 		
-	def send_message(self, dest, message):
-		self.msg.buffer = "PRIVMSG %s :%s" % (dest, message)
+	def send_command(self, event):
+		self.msg.buffer = "%s %s" % (event.type, event.message)
 		self.connection.send(self.msg)
+		if event.master != "":
+			self.send_message(event.master, "Command '%s' sent with parameters '%s', master!" % (event.type, event.message), "")
 		
-	def ping(self):
-		self.msg.buffer = "PONG :" + self.connection.host
+	def send_message(self, dest, message, master):
+		self.msg.buffer = "PRIVMSG %s :%s" % (dest, message)
+		print self.msg.buffer
+		self.connection.send(self.msg)
+		if master != "":
+			self.send_message(master, "Message '%s' sent to '%s', master!" % (message, dest), "")
+		
+	def ping(self, event):
+		self.msg.buffer = "PONG :" + self.connection.host[0]
 		self.msg.silent = True
 		self.connection.send(self.msg)
 		
@@ -46,24 +75,12 @@ class NetworkView():
 			channel = "#" + channel
 		return channel
 		
-	def disconnect(self, message):
+	def disconnect(self, event):
 		if self.connection is not False:
-			self.msg.buffer = "QUIT " + message
+			if event.master != "":
+				self.send_message(event.master, "Disconnecting with message '%s', master!" % (event.message), "")
+			self.msg.buffer = "QUIT " + event.message
 			self.connection.send(self.msg)
 			self.connection.close_connection()
 			self.connection = False
-
-	#----------------------------------------------------------------------
-	def notify(self, event):
-		if isinstance(event, LoginEvent):
-			self.connect(event.username)
-		elif isinstance(event, PingEvent):
-			self.ping()
-		elif isinstance(event, JoinEvent):
-			self.join_channel(event.channel)
-		elif isinstance(event, PartEvent):
-			self.part_channel(event.channel)
-		elif isinstance(event, SendPrivmsgEvent):
-			self.send_message(event.dest, event.message)
-		elif isinstance(event, DisconnectEvent):
-			self.disconnect(event.message)
+			self.ed.post(QuitEvent())

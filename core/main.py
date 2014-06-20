@@ -1,19 +1,13 @@
-from events import *
-from eventmanager import EventManager
-from bot import Bot
-from spinner import CPUSpinnerController
-#from console import ConsoleView
+from eventdispatcher import EventDispatcher
+from spinner import Spinner
 
-#from chat import ChatController, ChatView
+"""
+main.py
+Simply start the event dispatcher and run the spinner.
+"""
 
 def main():
-	eventManager = EventManager()
-	spinner = CPUSpinnerController(eventManager)
-	#console = ConsoleView(eventManager)
-	#chatView = ChatView(eventManager)
-	#chatControl = ChatController(eventManager)
-	bot = Bot(eventManager)
-	spinner.run()
+	Spinner(EventDispatcher()).run()
 
 if __name__ == '__main__':
 	main()

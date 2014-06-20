@@ -3,13 +3,17 @@ lib_path = os.path.abspath(os.path.join("..", "core"))
 sys.path.append(lib_path)
 from events import *
 import ConfigParser
+from weakboundmethod import WeakBoundMethod as Wbm
 
-class protocolIRC():
-	def __init__(self, evManager):
-		self.evManager = evManager
+class protocolirc():
+	def __init__(self, ed):
+		self.ed = ed
 		self.read_config()
 		self.started = False;
-		self.evManager.register_listener(self)
+		self._connections = [
+			self.ed.add(PrivmsgEvent, Wbm(self.parse_privmsg)),
+			self.ed.add(ReloadconfigEvent, Wbm(self.reload_config))
+		]
 		
 	def parse_privmsg(self, event):
 		if self.started == False:
@@ -26,37 +30,30 @@ class protocolIRC():
 		command = command[0].split(":")[1].lower()  # Get rid of the : at start and no caps
 		
 		if command == "join":  # channel
-			self.evManager.post(JoinEvent(parameters[0]))
+			self.ed.post(JoinEvent(parameters[0], nick))
 		elif command == "part":  # channel
-			self.evManager.post(PartEvent(parameters[0]))
+			self.ed.post(PartEvent(parameters[0], nick))
 		elif command == "send":  # destination, message
 			text = ""
 			for word in parameters[1:]:
 				text += "%s " % (word, )
-			text.strip()
-			self.evManager.post(SendPrivmsgEvent(parameters[0], text))
+			self.ed.post(SendPrivmsgEvent(parameters[0], text.strip(), nick))
 		elif command == "reloadconfig":  # list of modules to reload
 			for module in parameters:
-				self.evManager.post(ReloadconfigEvent(module))
+				self.ed.post(ReloadconfigEvent(module, nick))
 		elif command == "disconnect":
 			text = ""
 			for word in parameters:
 				text += "%s " % (word, )
 			text.strip()
-			self.evManager.post(DisconnectEvent(text))
+			self.ed.post(DisconnectEvent(text, nick))
 			return
 			
-		
-	def notify(self, event):
-		if isinstance(event, PrivmsgEvent):
-			self.parse_privmsg(event)
-		elif isinstance(event, ReloadconfigEvent):
-			if event.module == "protocolirc" or event.module == "all":
-				self.read_config()
-		elif isinstance(event, WelcomeEvent):
-			self.started = True
+	def reload_config(self, event):
+		if event.module == "protocolirc" or event.module == "all":
+			self.read_config()			
 
-	def is_master(self, source):
+	def is_master(self, source): # checks if source is master
 		for master in self.masters:
 			if source.lower() == master.lower():
 				return True
