@@ -33,7 +33,7 @@ class Connection:
 	def connect(self, use_ssl=False):
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		if use_ssl:
-			self.ssl = ssl.wrap_socket(self.socket)
+			self.ssl = ssl.wrap_socket(self.socket, ssl_version=ssl.PROTOCOL_SSLv3)
 			self.ssl.connect(self.host)
 		else:
 			self.socket.connect(self.host)
@@ -41,11 +41,17 @@ class Connection:
 		thread.start_new_thread(self.parse_header, ())
 		self.ed.post(ConnectedEvent())
 		return
-	
-	def parse_header(self):			
+
+	def check_state(self):
 		if self.closeState is not Connection.CLOSE_STATE_NONE:
-			#if not self.closingConnection():
-			#self.connectionLock.release()
+			return False
+		if self.writingError is True or self.readingError is True:
+			self.close_connection()
+			return False
+		return True
+
+	def parse_header(self):
+		if not self.check_state():
 			return
 		self.msg.buffer = self.safe_recv(2048)	#ACQUIRE PACKET BRO
 		self.connectionLock.acquire()
@@ -54,6 +60,8 @@ class Connection:
 		self.parse_packet()
 		
 	def parse_packet(self):
+		if not self.check_state():
+			return
 		self.netcontrol.on_recv_message(self.msg)
 		self.msg.reset()
 		#new thread
@@ -64,9 +72,10 @@ class Connection:
 		return
 		
 	def send(self, msg): # Can be called from any thread
+		if not self.check_state():
+			return
 		self.connectionLock.acquire()
 		if self.closeState is Connection.CLOSE_STATE_CLOSING:
-			#if not closingConnection():
 			self.connectionLock.release()
 			return False
 		if self.pendingWrite is 0:
@@ -76,7 +85,7 @@ class Connection:
 			pass
 			
 		self.connectionLock.release()
-		return True
+		return self.check_state()
 			
 	def internal_send(self, msg):
 		self.pendingWrite+=1
@@ -87,30 +96,33 @@ class Connection:
 		msg.reset()
 		self.pendingWrite-=1
 		
-	def close_connection(self):
+	def close_connection(self, type="server"):
 		self.connectionLock.acquire()
 		if self.closeState is not Connection.CLOSE_STATE_NONE:
 			self.connectionLock.release()
 			return
 		self.closeState = Connection.CLOSE_STATE_REQUESTED
 		self.connectionLock.release()
-		return self.close_connection_task()
+		return self.close_connection_task(type)
 		
-	def close_connection_task(self):
+	def close_connection_task(self, type="server"):
 		self.connectionLock.acquire()
 		if self.closeState is not Connection.CLOSE_STATE_REQUESTED:
 			self.ed.post(ConsoleEvent("Error: [Connection::close_connection_task] closeState = " + str(self.closeState)))
 			self.connectionLock.release()
 			return
 		self.closeState = Connection.CLOSE_STATE_CLOSING
-		if not self.closing_connection():
+		if not self.closing_connection(type):
 			self.connectionLock.release()
 		
-	def closing_connection(self):
+	def closing_connection(self, type="server"):
 		if self.pendingWrite is 0 or self.writingError is True:
 			if not self.socketClosed:
 				if self.ssl:
-					self.ssl.shutdown(socket.SHUT_RDWR)
+					try:
+						self.ssl.shutdown(socket.SHUT_RDWR)
+					except socket.error, msg:
+						pass
 					self.ssl.close()
 				else:
 					self.socket.close()
@@ -118,7 +130,7 @@ class Connection:
 			if self.pendingRead is 0 or self.readingError is True:
 				self.connectionLock.release()
 				self.dead = True
-				self.ed.post(ConnectionClosedEvent())
+				self.ed.post(ConnectionClosedEvent(type))
 				return True
 		return False
 			
@@ -136,15 +148,18 @@ class Connection:
 				position+=sent
 			except socket.error, msg:
 				self.writingError = True
+				return False
 			return position
 				
 	def safe_recv(self, size):
+		recv = 0
 		try:
 			if self.ssl:
-				return self.ssl.read(size)
+				recv = self.ssl.read(size)
 			else:
-				return self.socket.recv(size)
+				recv = self.socket.recv(size)
 		except socket.error, msg:
 			self.readingError = True
-		return False
+			return False
+		return recv
 			

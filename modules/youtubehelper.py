@@ -19,7 +19,6 @@ class youtubehelper():
 		self.read_config()
 		self.client = gdata.youtube.service.YouTubeService()
 		self.client.ssl = True
-		self.started = False
 		self._connections = [
 			self.ed.add(PrivmsgEvent, Wbm(self.parse_privmsg)),
 			self.ed.add(ReloadconfigEvent, Wbm(self.reload_config))
@@ -30,8 +29,6 @@ class youtubehelper():
 			self.read_config()
 		
 	def parse_privmsg(self, event):
-		if self.started == False:
-			return
 		message = event.message
 		urls = re.findall(r"""(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))""", message)
 		#urls = match_urls.match(message)#re.findall('(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', message)

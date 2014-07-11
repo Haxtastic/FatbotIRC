@@ -2,13 +2,13 @@ from events import PingEvent, ConsoleEvent, WelcomeEvent, OperEvent, PerformEven
 from networkmessage import NetworkMessage
 
 class NetworkController():
-"""
-This class is used too parse the input we get from the network at the lowest level, it only handles basic IRC protocol.
-It splits the input at line breaks since that means end of packet in the IRC protocol.
-It then parses these packets into the standard IRC packet form of [source, command, data] and posts the parameters with the right event.
+	"""
+	This class is used too parse the input we get from the network at the lowest level, it only handles basic IRC protocol.
+	It splits the input at line breaks since that means end of packet in the IRC protocol.
+	It then parses these packets into the standard IRC packet form of [source, command, data] and posts the parameters with the right event.
 
-Note: In case of the packet being a ping or error, the first parameter is the command.
-"""
+	Note: In case of the packet being a ping or error, the first parameter is the command.
+	"""
 	def __init__(self, ed):
 		self.ed = ed
 		

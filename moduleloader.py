@@ -7,7 +7,7 @@ It loads modules and reloads them simply put.
 """
 
 def load_modules(ed):
-	from modules import protocolirc, gamemanager, autopinger, performer, nickserv, rovarsprak, oper, youtubehelper, fridhemauth
+	from modules import protocolirc, gamemanager, autopinger, performer, nickserv, oper, youtubehelper, fridhemauth
 	list = []
 	#  Load your modules here
 	list.append(protocolirc.protocolirc(ed))
@@ -16,7 +16,6 @@ def load_modules(ed):
 	list.append(autopinger.autopinger(ed))
 	list.append(performer.performer(ed))
 	list.append(nickserv.nickserv(ed))
-	#list.append(rovarsprak.rovarsprak(evManager))
 	list.append(oper.oper(ed))
 	list.append(fridhemauth.fridhemauth(ed))
 	return list

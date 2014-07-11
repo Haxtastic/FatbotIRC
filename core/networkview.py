@@ -1,15 +1,15 @@
-from events import LoginEvent, PingEvent, JoinEvent, PartEvent, SendPrivmsgEvent, SendCommandEvent, DisconnectEvent, ConsoleEvent, QuitEvent
+from events import LoginEvent, PingEvent, JoinEvent, PartEvent, SendPrivmsgEvent, SendCommandEvent, DisconnectEvent, ReconnectEvent, ConsoleEvent, QuitEvent
 from networkmessage import NetworkMessage
 from weakboundmethod import WeakBoundMethod as Wbm
 
 class NetworkView():
-"""
-This is the class we use to handle all the output to the network.
-Events gets posted with their relevant parameters and this class handles them accordingly.
-All methods are pretty straight forward, they do as their named.
+	"""
+	This is the class we use to handle all the output to the network.
+	Events gets posted with their relevant parameters and this class handles them accordingly.
+	All methods are pretty straight forward, they do as their named.
 
-These methods can be executed by either the bot itself or by a master ordering it to.
-"""
+	These methods can be executed by either the bot itself or by a master ordering it to.
+	"""
 	def __init__(self, connection, ed):
 		self.connection = connection
 		self.ed = ed
@@ -21,7 +21,8 @@ These methods can be executed by either the bot itself or by a master ordering i
 			self.ed.add(PartEvent, Wbm(self.part_channel)),
 			self.ed.add(SendPrivmsgEvent, Wbm(self.send_message_event)),
 			self.ed.add(SendCommandEvent, Wbm(self.send_command)),
-			self.ed.add(DisconnectEvent, Wbm(self.disconnect))
+			self.ed.add(DisconnectEvent, Wbm(self.disconnect)),
+			self.ed.add(ReconnectEvent, Wbm(self.reconnect))
 		]
 		
 	def send_message_event(self, event):
@@ -67,7 +68,7 @@ These methods can be executed by either the bot itself or by a master ordering i
 		
 	def ping(self, event):
 		self.msg.buffer = "PONG :" + self.connection.host[0]
-		self.msg.silent = True
+		self.msg.silent = False
 		self.connection.send(self.msg)
 		
 	def make_channel(self, channel):
@@ -81,6 +82,14 @@ These methods can be executed by either the bot itself or by a master ordering i
 				self.send_message(event.master, "Disconnecting with message '%s', master!" % (event.message), "")
 			self.msg.buffer = "QUIT " + event.message
 			self.connection.send(self.msg)
-			self.connection.close_connection()
+			self.connection.close_connection("user")
 			self.connection = False
-			self.ed.post(QuitEvent())
+
+	def reconnect(self, event):
+		if self.connection is not False:
+			if event.master != "":
+				self.send_message(event.master, "Reconnecting with message '%s', master!" % (event.message), "")
+			self.msg.buffer = "QUIT " + event.message
+			self.connection.send(self.msg)
+			self.connection.close_connection("reconnect")
+			self.connection = False

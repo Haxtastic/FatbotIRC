@@ -3,12 +3,11 @@ from events import TickEvent, ConsoleEvent
 from weakboundmethod import WeakBoundMethod as Wbm
 import time
 
-"""
-The console view class handles all output to the console.
-It has a print queue and is thread safe to make sure every thing gets output in the right order.
-"""
-
 class ConsoleView:
+	"""
+	The console view class handles all output to the console.
+	It has a print queue and is thread safe to make sure every thing gets output in the right order.
+	"""
 	def __init__(self, ed):
 		self.ed = ed
 		self.printQueue = []

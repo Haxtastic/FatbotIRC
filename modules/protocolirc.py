@@ -41,13 +41,18 @@ class protocolirc():
 		elif command == "reloadconfig":  # list of modules to reload
 			for module in parameters:
 				self.ed.post(ReloadconfigEvent(module, nick))
-		elif command == "disconnect":
+		elif command == "disconnect" or command == "reconnect":
 			text = ""
 			for word in parameters:
 				text += "%s " % (word, )
 			text.strip()
-			self.ed.post(DisconnectEvent(text, nick))
+			if command == "disconnect":
+				self.ed.post(DisconnectEvent(text, nick))
+			elif command == "reconnect":
+				self.ed.post(ReconnectEvent(text, nick))
 			return
+		elif command == "print":
+			self.ed.post(ListenerPrintEvent())
 			
 	def reload_config(self, event):
 		if event.module == "protocolirc" or event.module == "all":

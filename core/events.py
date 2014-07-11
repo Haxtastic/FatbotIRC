@@ -67,7 +67,7 @@ class SendCommandEvent(Event):
 		self.master = master
 		
 class PingEvent(Event):
-	silent = True
+	silent = False
 	def __init__(self):
 		self.name = "PING Event"
 		
@@ -105,5 +105,17 @@ class PerformEvent(Event):
 		self.message = message
 		
 class ConnectionClosedEvent(Event):
-	def __init__(self):
+	def __init__(self, type):
 		self.name = "Connection closed Event"
+		self.type = type
+
+class ReconnectEvent(Event):
+	def __init__(self, message, master = ""):
+		self.name = "Reconnect Event"
+		self.message = message
+		self.master = master
+
+class ListenerPrintEvent(Event):
+	def __init__(self):
+		self.name = "Listener Print Event"
+		

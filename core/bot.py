@@ -1,4 +1,4 @@
-import thread
+import thread, atexit
 import ConfigParser
 from connection import Connection
 from consoleview import ConsoleView
@@ -22,20 +22,19 @@ class Bot:
 
 	def __init__(self, ed):
 		self.ed = ed
-		self.config = ConfigParser.RawConfigParser()
-		self.read_config()
 		self.state = Bot.STATE_STOPPED
+	
+	
+	def start(self):
+		self.state = Bot.STATE_PREPARING
 		self._connections = [
-			self.ed.add(StartEvent, Wbm(self.start)),
 			self.ed.add(ConnectedEvent, Wbm(self.connected)),
 			self.ed.add(WelcomeEvent, Wbm(self.start_modules)),
 			self.ed.add(ReloadconfigEvent, Wbm(self.reload_config)),
 			self.ed.add(ConnectionClosedEvent, Wbm(self.connection_closed))
 		]
-	
-	
-	def start(self, event):
-		self.state = Bot.STATE_PREPARING
+		self.config = ConfigParser.RawConfigParser()
+		self.read_config()
 		self.console = ConsoleView(self.ed)
 		self.modules = load_modules(self.ed)
 		self.server = Connection(self.ip, self.port, self.ed)
@@ -56,20 +55,28 @@ class Bot:
 		if event.module == "core" or event.module == "all":
 			self.read_config()
 		if event.module == "modules":
-			print "#### reload_modules called ####"
-			#self.modules = 
 			reload_modules(self.modules, self.ed)
-			print "#### reload_modules returns ####"
-			print self.modules
 	
 	def connection_closed(self, event):
 		self.state = Bot.STATE_STOPPED
-		self.ed.post(QuitEvent())
+		if (event.type == "server" and self.reconnect) or event.type == "reconnect":
+			self.restart()
+		else:
+			self.ed.post(QuitEvent())
+
+	def restart(self):
+		self._connections = None
+		self.config = None
+		self.console = None
+		self.modules = None
+		self.server = None
+		self.start()
 	
 	def read_config(self):
 		self.config.read('config.cfg')
-		self.ip   	= self.config.get		("Connection", "ip")
-		self.port 	= self.config.getint	("Connection", "port")
-		self.name 	= self.config.get		("Connection", "name")
-		self.ssl 	= self.config.getint	("Connection", "ssl")
-			
+		self.ip   		= self.config.get		("Connection", "ip")
+		self.port 		= self.config.getint	("Connection", "port")
+		self.name 		= self.config.get		("Connection", "name")
+		self.ssl 		= self.config.getint	("Connection", "ssl")
+		self.reconnect	= self.config.getint	("Connection", "reconnect")
+
