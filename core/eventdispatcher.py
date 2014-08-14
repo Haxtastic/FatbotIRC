@@ -1,5 +1,5 @@
-from events import ConsoleEvent, TickEvent, ListenerPrintEvent
-import thread
+from events import ConsoleEvent, TickEvent, ListenerPrintEvent, PrivmsgEvent
+import thread, time
 from weakboundmethod import WeakBoundMethod as Wbm
 
 class Connection:
@@ -29,6 +29,8 @@ class EventDispatcher:
 		self.eventQueue = []
 		self.nextQueue = []
 		self.postLock = thread.allocate_lock()
+		self.tickFreq = 0.5
+		self.lastTick = time.time()
 	
 	def add(self, eventcls, listener):
 		self._listeners.setdefault(eventcls, list()).append(listener)
@@ -46,11 +48,15 @@ class EventDispatcher:
 		self.eventQueue = self.nextQueue
 		self.nextQueue = []
 		self.postLock.release()
-		self.eventQueue.append(TickEvent())
+		if(time.time() - self.lastTick > self.tickFreq):
+			self.eventQueue.append(TickEvent())
+			self.lastTick = time.time()
 		for event in self.eventQueue:
 			try:
 				for listener in self._listeners[event.__class__]:
 					listener(event)
+					#else:
+					#	thread.start_new_thread(listener, (event, ))
 			except KeyError:
 				pass # No listener interested in this event
 
