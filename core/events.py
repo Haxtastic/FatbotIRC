@@ -10,27 +10,28 @@ class Event:
 		
 class TickEvent(Event):
 	def __init__(self):
-		self.name = "Tick"
+		self.name = "Tick Event"
 		
 class StartEvent(Event):
 	def __init__(self):
-		self.name = "Start up"
+		self.name = "Start Event"
 		
 class RunningEvent(Event):
-	def __init__(self):
-		self.name = "Bot up and running"
-		
+	def __init__(self, host):
+		self.name = "Running Event"
+		self.host = host
+
 class QuitEvent(Event):
 	def __init__(self):
-		self.name = "Program Quit"
+		self.name = "Quit Event"
 		
 class ConnectedEvent(Event):
 	def __init__(self):
-		self.name = "Connected"
+		self.name = "Connected Event"
 		
 class LoginEvent(Event):
 	def __init__(self, username):
-		self.name = "Login in"
+		self.name = "Login Event"
 		self.username = username
 		
 class PrivmsgEvent(Event):
@@ -68,8 +69,9 @@ class SendCommandEvent(Event):
 		
 class PingEvent(Event):
 	silent = False
-	def __init__(self):
+	def __init__(self, message):
 		self.name = "PING Event"
+		self.message = message
 		
 class ConsoleEvent(Event):
 	silent = True
@@ -118,4 +120,15 @@ class ReconnectEvent(Event):
 class ListenerPrintEvent(Event):
 	def __init__(self):
 		self.name = "Listener Print Event"
+
+class ParsedPrivmsgEvent(Event):
+	def __init__(self, nick, source, channel, message, command, parameters):
+		self.name = "ParsedPrivmsg Event"
+		self.nick = nick
+		self.source = source
+		self.channel = channel
+		self.message = message
+		self.command = command
+		self.parameters = parameters
+
 		
