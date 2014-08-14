@@ -3,10 +3,14 @@ class NetworkMessage:
 	A simple class to ease message output to the server.
 	Basically just a wrapper for the output buffer.
 	"""
-	def __init__(self):
-		self.buffer = ""
-		self.reset()
-		self.silent = False
+	def __init__(self, netmsg=None):
+		if(netmsg == None):
+			self.buffer = ""
+			self.reset()
+			self.silent = False
+		else:
+			self.buffer = netmsg.buffer
+			self.silent = netmsg.silent
 		return
 		
 	def reset(self):
