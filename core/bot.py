@@ -36,17 +36,15 @@ class Bot:
 		self.config = ConfigParser.RawConfigParser()
 		self.read_config()
 		self.console = ConsoleView(self.ed)
-		self.modules = load_modules(self.ed)
+		#self.modules = load_modules(self.ed)
 		self.server = Connection(self.ip, self.port, self.ed)
 		self.server.connect(self.ssl)
 	
 	def start_modules(self, event):
-		for module in self.modules:
-			if hasattr(module, "started"):
-				module.started = True
+		self.modules = load_modules(self.ed)
 		if(self.state == Bot.STATE_PREPARING):
 			self.state = Bot.STATE_RUNNING
-			self.ed.post(RunningEvent())
+			self.ed.post(RunningEvent(self.ip))
 	
 	def connected(self, event):
 		self.ed.post(LoginEvent(self.name))
