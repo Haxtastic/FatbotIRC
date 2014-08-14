@@ -14,7 +14,10 @@ class nickserv():
 		]
 		
 	def identify(self, event):
-		self.ed.post(SendPrivmsgEvent("nickserv", "identify %s %s" % (self.nick, self.password), ""))
+		if event.host.find("quakenet") != -1:
+			self.ed.post(SendPrivmsgEvent("Q@Cserve.quakenet.org", "auth %s %s" % (self.nick, self.password)))
+		else:
+			self.ed.post(SendPrivmsgEvent("nickserv", "identify %s %s" % (self.nick, self.password), ""))
 			
 	def read_config(self):
 		self.config = ConfigParser.RawConfigParser()
