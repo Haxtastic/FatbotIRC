@@ -18,8 +18,6 @@ class gamemanager():
 		]
 		
 	def parse_privmsg(self, event):
-		if self.started == False:
-			return
 		nick, source = event.source.split("!")
 		channel = event.channel
 		message = event.message
@@ -27,7 +25,7 @@ class gamemanager():
 			channel = nick
 		
 		if self.games.has_key(source):  # if message owner is in a game, let the game process the info
-			self.games[source].process(event.message.split(":")[1], channel, nick)
+			self.games[source].process(message, channel, nick)
 			return
 			
 		command = message.split(" ")
