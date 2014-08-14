@@ -61,13 +61,12 @@ class NetworkView():
 		
 	def send_message(self, dest, message, master):
 		self.msg.buffer = "PRIVMSG %s :%s" % (dest, message)
-		print self.msg.buffer
 		self.connection.send(self.msg)
 		if master != "":
 			self.send_message(master, "Message '%s' sent to '%s', master!" % (message, dest), "")
 		
 	def ping(self, event):
-		self.msg.buffer = "PONG :" + self.connection.host[0]
+		self.msg.buffer = "PONG :" + event.message
 		self.msg.silent = False
 		self.connection.send(self.msg)
 		
