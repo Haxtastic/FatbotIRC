@@ -1,4 +1,4 @@
-from events import PingEvent, ConsoleEvent, WelcomeEvent, OperEvent, PerformEvent, PrivmsgEvent
+from events import PingEvent, ConsoleEvent, WelcomeEvent, OperEvent, PerformEvent, PrivmsgEvent, SendCommandEvent
 from networkmessage import NetworkMessage
 
 class NetworkController():
@@ -25,21 +25,33 @@ class NetworkController():
 		if parameters[0].find(":") != -1:
 			parameters[0] = parameters[0].split(":")[1]  # Get rid of the : at the start of the message
 		if parameters[0] == "PING":
-			self.ed.post(PingEvent())
+			parameters[1] = parameters[1].split(":")[1]
+			self.ed.post(PingEvent(parameters[1]))
 			return
 		elif parameters[0] == "ERROR":
 			self.ed.post(ConsoleEvent(buffer.strip()))
+			self.ed.post(ConnectionClosedEvent("server"))
 			return
 		self.ed.post(ConsoleEvent(buffer.strip())) # Print message
 		if len(parameters) < 2: # Two is too few parameters hurrhurr
 			try:
-				error = "Error: [NetworkController::parse_packet] parameters[0] = %s" % parameters[0]
+				if len(parameters) == 2:
+					error = "Error: [NetworkController::parse_packet] parameters[0] = %s parameters[1] = %s" % (parameters[0], parameters[1])
+				else:
+					error = "Error: [NetworkController::parse_packet] parameters[0] = %s" % parameters[0]
 			except TypeError:
 				error = "Error: [NetworkController::parse_packet] TypeError when formatting parameters string"
 			self.ed.post(ConsoleEvent(error))
+		elif len(parameters) > 3 and parameters[1] == "NOTICE":
+			if parameters[3].find("You are now logged in as") != -1:
+				name = parameters[3].split(":You are now logged in as")[1].split(".")[0].strip()
+				self.ed.post(SendCommandEvent("MODE", "%s +x" % name, ""))
 		#Welcome message
 		elif parameters[1] == "001":  # message
 			self.ed.post(WelcomeEvent(parameters[3]))
+		#Mask Hostname successful:
+		elif parameters[1] == "396":
+			self.ed.post(PerformEvent(parameters[3]))
 		#Auth successful message
 		elif parameters[1] == "900":  # message
 			self.ed.post(OperEvent(parameters[3]))
