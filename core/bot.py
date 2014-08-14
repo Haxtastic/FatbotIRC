@@ -15,18 +15,11 @@ Actually quite a simple class, but it does what it should.
 """
 
 class Bot:
-	STATE_STOPPED = 'stopped'
-	STATE_PREPARING = 'preparing'
-	STATE_RUNNING = 'running'
-	STATE_PAUSED = 'paused'
 
 	def __init__(self, ed):
 		self.ed = ed
-		self.state = Bot.STATE_STOPPED
-	
 	
 	def start(self):
-		self.state = Bot.STATE_PREPARING
 		self._connections = [
 			self.ed.add(ConnectedEvent, Wbm(self.connected)),
 			self.ed.add(WelcomeEvent, Wbm(self.start_modules)),
@@ -36,15 +29,12 @@ class Bot:
 		self.config = ConfigParser.RawConfigParser()
 		self.read_config()
 		self.console = ConsoleView(self.ed)
-		#self.modules = load_modules(self.ed)
 		self.server = Connection(self.ip, self.port, self.ed)
 		self.server.connect(self.ssl)
 	
 	def start_modules(self, event):
 		self.modules = load_modules(self.ed)
-		if(self.state == Bot.STATE_PREPARING):
-			self.state = Bot.STATE_RUNNING
-			self.ed.post(RunningEvent(self.ip))
+		self.ed.post(RunningEvent(self.ip))
 	
 	def connected(self, event):
 		self.ed.post(LoginEvent(self.name))
@@ -56,7 +46,6 @@ class Bot:
 			reload_modules(self.modules, self.ed)
 	
 	def connection_closed(self, event):
-		self.state = Bot.STATE_STOPPED
 		if (event.type == "server" and self.reconnect) or event.type == "reconnect":
 			self.restart()
 		else:
