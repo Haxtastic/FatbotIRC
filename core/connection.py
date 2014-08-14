@@ -25,7 +25,7 @@ class Connection:
 	def connect(self, use_ssl=False):
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		if use_ssl:
-			self.ssl = ssl.wrap_socket(self.socket, ssl_version=ssl.PROTOCOL_SSLv3)
+			self.ssl = ssl.wrap_socket(self.socket, ssl_version=ssl.PROTOCOL_SSLv23)
 			self.ssl.connect(self.host)
 		else:
 			self.socket.connect(self.host)
