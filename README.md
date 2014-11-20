@@ -3,6 +3,9 @@ Welcome to Fatbot Slim for IRC!
 This bot is a hobby project of mine.  
 This project is one of my first in Python(Wrote a chat server and client before this.)  
 
+To run terminal just run main.py.
+To run with GUI (wxPython) then you can either run gui.py or main.py with parameter gui, e.g. "python main.py gui"
+
 Tried to fit it into the MVC-pattern, but realized that I've made a huge mistake and will now continue with this junk.
 
 It should be easy adding a new module to the bot.  
