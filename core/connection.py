@@ -2,7 +2,7 @@ import thread, socket, ssl
 from networkview import NetworkView
 from networkcontroller import NetworkController
 from networkmessage import NetworkMessage
-from events import ConnectedEvent, ConsoleEvent, ConnectionClosedEvent
+from events import ConnectedEvent, OutputEvent, ConnectionClosedEvent, DisconnectEvent
 """
 Our connection class.
 This class handles all the underlying data transfer between the bot and the server.
@@ -42,7 +42,8 @@ class Connection:
 	def parse_packet(self):
 		while self.check_state():
 			self.msg.buffer = self.safe_recv(2048)	#ACQUIRE PACKET BRO
-			self.netcontrol.on_recv_message(self.msg)
+			if isinstance(self.msg.buffer, basestring) and self.msg.buffer != "":
+				self.netcontrol.on_recv_message(self.msg)
 			self.msg.reset()
 		return
 		
@@ -63,7 +64,7 @@ class Connection:
 		
 	def close_connection(self, type="server"):
 		self.connectionLock.acquire()
-		self.netview.disconnect(DisconnectEvent("Hey man, is this a dream?"))
+		#self.netview.disconnect(DisconnectEvent("Hey man, is this a dream?"))
 		try:
 			if self.ssl:
 				self.ssl.shutdown(socket.SHUT_RDWR)
@@ -71,7 +72,7 @@ class Connection:
 			else:
 				self.socket.close()
 		except socket.error, msg:
-			self.ed.post(ConsoleEvent(msg))
+			self.ed.post(OutputEvent("Internal", msg))
 		self.ed.post(ConnectionClosedEvent(type))
 		self.connectionLock.release()
 		return True

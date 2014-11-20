@@ -13,7 +13,7 @@ class privmsgparser():
 		]
 		
 	def parse_privmsg(self, event):
-		if event.message.find(" ") == -1:
+		if " " not in event.message:
 			return
 		nick, source = event.source.split("!")
 		command = event.message.split(" ")

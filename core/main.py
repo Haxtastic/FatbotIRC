@@ -1,13 +1,15 @@
-from eventdispatcher import EventDispatcher
-from spinner import Spinner
+#!/usr/bin/python
+import spinner
+import gui
+import sys
 
 """
 main.py
-Simply start the event dispatcher and run the spinner.
+Start the bot with either GUI or Console.
 """
 
-def main():
-	Spinner(EventDispatcher()).run()
-
 if __name__ == '__main__':
-	main()
+	if(len(sys.argv) > 1 and sys.argv[1].lower() == "gui"):
+		gui.main()
+	else:
+		spinner.main()

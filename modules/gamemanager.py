@@ -18,19 +18,24 @@ class gamemanager():
 		]
 		
 	def parse_privmsg(self, event):
-		nick, source = event.source.split("!")
+		if "!" not in event.source or ":" not in event.message:
+			return
+		nick, source = event.source.split("!", 1)
 		channel = event.channel
-		message = event.message
+		message = event.message.split(":", 1)[1]
 		if channel[0] != "#":  # if the message isn't from a channel, the channel is the message owners nick
 			channel = nick
 		
 		if self.games.has_key(source):  # if message owner is in a game, let the game process the info
 			self.games[source].process(message, channel, nick)
 			return
+		
+		if " " not in event.message:
+			return
 			
 		command = message.split(" ")
 		parameters = command[1:]
-		command = command[0].split(":")[1].lower()  # Get rid of the : at start and no caps
+		command = command[0].lower()  # Get rid of the : at start and no caps
 		
 		if command == "guessnumber":				
 			self.games[source] = guessnumber.Guessnumber(self.ed, channel, nick, parameters)

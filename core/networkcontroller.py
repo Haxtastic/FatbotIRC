@@ -1,4 +1,4 @@
-from events import PingEvent, ConsoleEvent, WelcomeEvent, OperEvent, PerformEvent, PrivmsgEvent, SendCommandEvent
+from events import PingEvent, OutputEvent, WelcomeEvent, OperEvent, PerformEvent, PrivmsgEvent, SendCommandEvent, ConnectionClosedEvent
 from networkmessage import NetworkMessage
 
 class NetworkController():
@@ -13,11 +13,10 @@ class NetworkController():
 		self.ed = ed
 		
 	def on_recv_message(self, msg):
-		if msg.buffer != "":
-			msg.strip_message()
-			messages = msg.buffer.split("\n")
-			for text in messages:
-				self.parse_packet(text)
+		msg.strip_message()
+		messages = msg.buffer.split("\n")
+		for text in messages:
+			self.parse_packet(text)
 		
 	def parse_packet(self, buffer):
 		#source, command, data
@@ -29,10 +28,10 @@ class NetworkController():
 			self.ed.post(PingEvent(parameters[1]))
 			return
 		elif parameters[0] == "ERROR":
-			self.ed.post(ConsoleEvent(buffer.strip()))
+			self.ed.post(OutputEvent("Internal", buffer.strip()))
 			self.ed.post(ConnectionClosedEvent("server"))
 			return
-		self.ed.post(ConsoleEvent(buffer.strip())) # Print message
+		self.ed.post(OutputEvent("Server", buffer.strip())) # Print message
 		if len(parameters) < 2: # Two is too few parameters hurrhurr
 			try:
 				if len(parameters) == 2:
@@ -41,7 +40,7 @@ class NetworkController():
 					error = "Error: [NetworkController::parse_packet] parameters[0] = %s" % parameters[0]
 			except TypeError:
 				error = "Error: [NetworkController::parse_packet] TypeError when formatting parameters string"
-			self.ed.post(ConsoleEvent(error))
+			self.ed.post(OutputEvent("Internal", error))
 		elif len(parameters) > 3 and parameters[1] == "NOTICE":
 			if parameters[3].find("You are now logged in as") != -1:
 				name = parameters[3].split(":You are now logged in as")[1].split(".")[0].strip()

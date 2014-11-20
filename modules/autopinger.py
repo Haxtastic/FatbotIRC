@@ -17,11 +17,11 @@ class autopinger():
 		]
 
 	def reset(self, event):
-			self.lastPing = time.time()
+		self.lastPing = time.time()
 		
 	def ping(self, event):
 		if time.time() - self.lastPing > self.timeout:
-			self.ed.post(PingEvent())
+			self.ed.post(PingEvent("trail and error..."))
 			
 	def reload_config(self, event):
 		if event.module == "autopinger" or event.module == "all":

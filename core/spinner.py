@@ -2,9 +2,10 @@
 from weakboundmethod import WeakBoundMethod as Wbm
 from events import TickEvent, QuitEvent, StartEvent
 from bot import Bot
-import time
+from eventdispatcher import EventDispatcher
+import time, wx
 
-class Spinner:
+class Spinner():
 	"""
 	This is our spinner class, it's what keeps the bot alive.
 	It will run until a QuitEvent has been sent out.
@@ -13,7 +14,6 @@ class Spinner:
 	def __init__(self, ed):
 		self.ed 		= ed
 		self.alive 		= True
-		self.event 		= TickEvent()
 		self.bot 		= Bot(ed)
 		self._connection = [
 			self.ed.add(QuitEvent, Wbm(self.quit))
@@ -24,8 +24,14 @@ class Spinner:
 		self.bot.start()
 		while self.alive is True:
 			self.ed.consume_event_queue()
-			time.sleep(0.01)
+			time.sleep(0.1)
 		
 	def quit(self, event):
 		self.alive = False
+		
+def main():
+	Spinner(EventDispatcher()).run()
+
+if __name__ == '__main__':
+	main()
 		

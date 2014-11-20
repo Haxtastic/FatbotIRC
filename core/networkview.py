@@ -1,6 +1,7 @@
-from events import LoginEvent, PingEvent, JoinEvent, PartEvent, SendPrivmsgEvent, SendCommandEvent, DisconnectEvent, ReconnectEvent, ConsoleEvent, QuitEvent
+from events import LoginEvent, PingEvent, JoinEvent, PartEvent, SendPrivmsgEvent, SendCommandEvent, DisconnectEvent, ReconnectEvent, OutputEvent, QuitEvent, TickEvent
 from networkmessage import NetworkMessage
 from weakboundmethod import WeakBoundMethod as Wbm
+import thread, time
 
 class NetworkView():
 	"""
@@ -13,7 +14,13 @@ class NetworkView():
 	def __init__(self, connection, ed):
 		self.connection = connection
 		self.ed = ed
-		self.msg = NetworkMessage()
+		#self.msg = NetworkMessage()
+		self.send_queue = []
+		self.send_lock = thread.allocate_lock()
+		self.message_time = 0
+		self.messages_sent = 0
+		self.total_messages_sent = 0
+		self.max_messages_per_second = 4
 		self._connections = [
 			self.ed.add(LoginEvent, Wbm(self.connect)),
 			self.ed.add(PingEvent, Wbm(self.ping)),
@@ -22,7 +29,8 @@ class NetworkView():
 			self.ed.add(SendPrivmsgEvent, Wbm(self.send_message_event)),
 			self.ed.add(SendCommandEvent, Wbm(self.send_command)),
 			self.ed.add(DisconnectEvent, Wbm(self.disconnect)),
-			self.ed.add(ReconnectEvent, Wbm(self.reconnect))
+			self.ed.add(ReconnectEvent, Wbm(self.reconnect)),
+			self.ed.add(TickEvent, Wbm(self.consume_send_pool))
 		]
 		
 	def send_message_event(self, event):
@@ -30,65 +38,102 @@ class NetworkView():
 		
 	def on_send_message(self, msg): # Called by instance owner(connection) every time a message is sent
 		if msg.silent is False:
-			self.ed.post(ConsoleEvent(msg.buffer))
+			self.ed.post(OutputEvent("Bot", msg.buffer))
 		msg.end_message()
 		
 	def connect(self, event):
-		self.msg.buffer = "USER " + event.username + " * 8 :" + event.username + " sloffson"
-		self.connection.send(self.msg)
-		self.msg.buffer = "NICK " + event.username
-		self.connection.send(self.msg)
+		msg = NetworkMessage()
+		msg.buffer = "USER " + event.username + " * 8 :" + event.username + " sloffson"
+		self.send(msg)
+		msg = NetworkMessage()
+		msg.buffer = "NICK " + event.username
+		self.send(msg)
 		
 	def join_channel(self, event):
+		msg = NetworkMessage()
 		channel = self.make_channel(event.channel)
-		self.msg.buffer = "JOIN " + channel
-		self.connection.send(self.msg)
+		msg.buffer = "JOIN " + channel
+		self.send(msg)
 		if event.master != "":
 			self.send_message(event.master, "Joining channel '%s', master!" % (channel), "")
 		
 	def part_channel(self, event):
+		msg = NetworkMessage()
 		channel = self.make_channel(event.channel)
-		self.msg.buffer = "PART " + channel
-		self.connection.send(self.msg)
+		msg.buffer = "PART " + channel
+		self.send(msg)
 		if event.master != "":
 			self.send_message(event.master, "Parting channel '%s', master!" % (channel), "")
 		
 	def send_command(self, event):
-		self.msg.buffer = "%s %s" % (event.type, event.message)
-		self.connection.send(self.msg)
+		msg = NetworkMessage()
+		msg.buffer = "%s " % event.type
+		if not isinstance(event.message, basestring):
+			for word in event.message:
+				msg.buffer += "%s " % word
+			msg.buffer = msg.buffer.strip()
+		else:
+			msg.buffer = "%s %s" % (msg.buffer, event.message)
+		self.send(msg)
 		if event.master != "":
 			self.send_message(event.master, "Command '%s' sent with parameters '%s', master!" % (event.type, event.message), "")
-		
+
 	def send_message(self, dest, message, master):
-		self.msg.buffer = "PRIVMSG %s :%s" % (dest, message)
-		self.connection.send(self.msg)
+		msg = NetworkMessage()
+		msg.buffer = "PRIVMSG %s :%s" % (dest, message)
+		self.send(msg)
 		if master != "":
 			self.send_message(master, "Message '%s' sent to '%s', master!" % (message, dest), "")
 		
 	def ping(self, event):
-		self.msg.buffer = "PONG :" + event.message
-		self.msg.silent = False
-		self.connection.send(self.msg)
+		msg = NetworkMessage()
+		msg.buffer = "PONG :" + event.message
+		msg.silent = False
+		self.send(msg)
 		
 	def make_channel(self, channel):
 		if channel[0] != "#":
 			channel = "#" + channel
 		return channel
 		
+	def send(self, msg):
+		self.send_lock.acquire()
+		self.send_queue.append(msg)
+		self.send_lock.release()
+		
 	def disconnect(self, event):
+		msg = NetworkMessage(True, "user")
 		if self.connection is not False:
 			if event.master != "":
 				self.send_message(event.master, "Disconnecting with message '%s', master!" % (event.message), "")
-			self.msg.buffer = "QUIT " + event.message
-			self.connection.send(self.msg)
-			self.connection.close_connection("user")
-			self.connection = False
+			msg.buffer = "QUIT :" + event.message
+			self.send(msg)
 
 	def reconnect(self, event):
+		msg = NetworkMessage(True, "reconnect")
 		if self.connection is not False:
 			if event.master != "":
 				self.send_message(event.master, "Reconnecting with message '%s', master!" % (event.message), "")
-			self.msg.buffer = "QUIT " + event.message
-			self.connection.send(self.msg)
-			self.connection.close_connection("reconnect")
+			msg.buffer = "QUIT " + event.message
+			self.send(msg)
+			self.send_lock.release()
+			
+	def consume_send_pool(self, event):
+		self.send_lock.acquire()
+		if time.time() - self.message_time > (1000/self.max_messages_per_second):
+			self.message_time = time.time()
+			self.messages_sent = max(self.messages_sent-1, 0)
+		
+		if len(self.send_queue) <= 0 or not self.connection or self.messages_sent >= self.max_messages_per_second:
+			self.send_lock.release()
+			return
+			
+		msg = self.send_queue.pop(0)
+		self.connection.send(msg)
+		if msg.dc_send:
+			self.connection.close_connection(msg.dc_msg)
 			self.connection = False
+			
+		self.send_lock.release()
+		
+			

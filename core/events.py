@@ -1,3 +1,4 @@
+import time
 """
 The events file.
 These are all the events that the bot can send out.
@@ -68,16 +69,16 @@ class SendCommandEvent(Event):
 		self.master = master
 		
 class PingEvent(Event):
-	silent = False
 	def __init__(self, message):
 		self.name = "PING Event"
 		self.message = message
 		
-class ConsoleEvent(Event):
-	silent = True
-	def __init__(self, text):
-		self.name = "Console Event"
-		self.text = text
+class OutputEvent(Event):
+	silent=True
+	def __init__(self, origin, text):
+		self.name = "Output Event"
+		y, m, d, h, m, s, wd, yd, isdst = time.localtime()
+		self.text = "%02d:%02d:%02d %s: %s" % (h, m, s, origin.upper(), text)
 		
 class ReloadconfigEvent(Event):
 	def __init__(self, module, master = ""):

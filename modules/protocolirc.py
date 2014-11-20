@@ -20,8 +20,12 @@ class protocolirc():
 		command, parameters = event.command, event.parameters
 		
 		# :Kek!Keke@somekind.ofspecial.mask PRIVMSG Fatbot :Hey
-		if channel[0] == "#" or message.find(" ") == -1 or not self.is_master(source):  # If no parameters or not master, discard
+		if (channel[0] == "#" and command != "fatbot") or " " not in message or not self.is_master(source):  # If no parameters or not master, discard
 			return
+		
+		if command == "fatbot" and len(parameters) > 1:
+			command = parameters[0]
+			parameters = parameters[1:]
 		
 		if command == "join":  # channel
 			self.ed.post(JoinEvent(parameters[0], nick))
@@ -39,18 +43,20 @@ class protocolirc():
 			text = ""
 			for word in parameters:
 				text += "%s " % (word, )
-			text.strip()
+			text = text.strip()
 			if command == "disconnect":
 				self.ed.post(DisconnectEvent(text, nick))
 			elif command == "reconnect":
 				self.ed.post(ReconnectEvent(text, nick))
 			return
-		elif command == "print":
-			self.ed.post(ListenerPrintEvent())
+		elif command == "command":
+			self.ed.post(SendCommandEvent(parameters[0], parameters[1:]))
+		elif command == "execute":
+			exec(" ".join(parameters))
 			
 	def reload_config(self, event):
 		if event.module == "protocolirc" or event.module == "all":
-			self.read_config()			
+			self.read_config()
 
 	def is_master(self, source): # checks if source is master
 		for master in self.masters:

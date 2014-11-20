@@ -1,4 +1,4 @@
-from events import ConsoleEvent, TickEvent, ListenerPrintEvent, PrivmsgEvent
+from events import OutputEvent, TickEvent, ListenerPrintEvent, PrivmsgEvent
 import thread, time
 from weakboundmethod import WeakBoundMethod as Wbm
 
@@ -40,7 +40,7 @@ class EventDispatcher:
 		self.postLock.acquire()
 		self.nextQueue.append(event)
 		if not event.silent:
-			self.nextQueue.append(ConsoleEvent(event.name))
+			self.nextQueue.append(OutputEvent("Internal", event.name))
 		self.postLock.release()
 	
 	def consume_event_queue(self): # Actually dispatch the events
@@ -54,6 +54,7 @@ class EventDispatcher:
 		for event in self.eventQueue:
 			try:
 				for listener in self._listeners[event.__class__]:
+					#if isinstance(event, TickEvent):
 					listener(event)
 					#else:
 					#	thread.start_new_thread(listener, (event, ))

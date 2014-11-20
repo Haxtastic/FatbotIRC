@@ -33,6 +33,8 @@ class Bot:
 		self.server.connect(self.ssl)
 	
 	def start_modules(self, event):
+		if event.message == "modulereload":
+			return
 		self.modules = load_modules(self.ed)
 		self.ed.post(RunningEvent(self.ip))
 	
@@ -43,7 +45,7 @@ class Bot:
 		if event.module == "core" or event.module == "all":
 			self.read_config()
 		if event.module == "modules":
-			reload_modules(self.modules, self.ed)
+			self.modules = reload_modules(self.modules, self.ed)
 	
 	def connection_closed(self, event):
 		if (event.type == "server" and self.reconnect) or event.type == "reconnect":
@@ -54,7 +56,6 @@ class Bot:
 	def restart(self):
 		self._connections = None
 		self.config = None
-		self.console = None
 		self.modules = None
 		self.server = None
 		self.start()

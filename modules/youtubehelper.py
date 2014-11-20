@@ -4,10 +4,7 @@ import os, sys
 lib_path = os.path.abspath(os.path.join("..", "core"))
 sys.path.append(lib_path)
 from events import *
-import gdata.youtube
-import gdata.youtube.service
-import re
-import ConfigParser
+import gdata.youtube, gdata.youtube.service, datetime, re, ConfigParser
 from urlparse import urlparse, parse_qs
 import urllib2 as urllib
 from bs4 import BeautifulSoup
@@ -39,7 +36,6 @@ class youtubehelper():
 				url = "http://" + urlT[0]
 			else:
 				url = urlT[0]
-			print url
 			videoid = self.video_id(url)
 			if videoid is None:
 				#get title of site
@@ -55,9 +51,11 @@ class youtubehelper():
 				try:
 					#get stats of video
 					video = self.client.GetYouTubeVideoEntry(video_id=videoid)
-					title =  self.youtubetitle % (video.media.title.text, video.statistics.view_count, video.rating.average)
+					title =  self.youtubetitle % (video.media.title.text, video.statistics.view_count, video.rating.average, str(datetime.timedelta(seconds=int(video.media.duration.seconds))))
 				except gdata.service.RequestError:
 					title = "YouTube Error: Invalid video id"
+			if event.channel[0] != '#' and "!" in event.source:
+				event.channel = event.source.split("!")[0]
 			self.ed.post(SendPrivmsgEvent(event.channel, title))
 		"""
 			if url.find("youtube.com/watch") != -1:

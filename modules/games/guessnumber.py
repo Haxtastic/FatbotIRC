@@ -6,11 +6,17 @@ from events import *
 from weakboundmethod import WeakBoundMethod as Wbm
 
 class Guessnumber():
+	MESSAGE_WIN 		= "Congratulations %s you have guessed the right number and therefore won the game!"
+	MESSAGE_TRIES		= "It only took you %d tries!"
+	MESSAGE_ERROR 		= "%s: Syntax error. Usage: \"guessnumber min max\" where min is the minimum value and max is the maximum value."
+	MESSAGE_START 		= "Game of Guessnumber started with %s. Try guessing which number I am thinking of by saying a number."
+	MESSAGE_LOWER		= "%s: The number I'm thinking of is lower."
+	MESSAGE_HIGHER		= "%s: The number I'm thinking of is higher."
+	MESSAGE_INTERNAL 	= "Game of Guessnumber started with %s, number is %d."
+	
 	def __init__(self, ed, channel, nick, parameters):
 		self.STATE_STOPPED = 'stopped'
 		self.STATE_RUNNING = 'running'
-		self.MESSAGE_ERROR = "%s: Syntax error. Usage: \"guessnumber min max\" where min is the minimum value and max is the maximum value."
-		self.MESSAGE_START = "Game of Guessnumber started with %s. Try guessing which number I am thinking of by saying a number."
 		self.ed = ed
 		self.state = self.STATE_STOPPED
 		self.realchannel = channel
@@ -22,16 +28,17 @@ class Guessnumber():
 			self.channel = self.realchannel
 			
 		if len(parameters) < 2:  # not enough parameters, output help
-			self.ed.post(SendPrivmsgEvent(channel, self.MESSAGE_ERROR % (nick,)))
+			self.ed.post(SendPrivmsgEvent(channel, Guessnumber.MESSAGE_ERROR % (nick,)))
 			return
 		try:
 			min = int(parameters[0])
 			max = int(parameters[1])
 		except ValueError:
-			self.ed.post(SendPrivmsgEvent(channel, self.MESSAGE_ERROR % (nick,)))
+			self.ed.post(SendPrivmsgEvent(channel, Guessnumber.MESSAGE_ERROR % (nick,)))
 			return
 		self.number = random.randint(min, max)
-		self.ed.post(SendPrivmsgEvent(channel, self.MESSAGE_START % (nick, )))
+		self.ed.post(SendPrivmsgEvent(channel, Guessnumber.MESSAGE_START % (nick, )))
+		self.ed.post(OutputEvent("Internal", Guessnumber.MESSAGE_INTERNAL % (nick, self.number)))
 		self.state = self.STATE_RUNNING
 		
 	def process(self, message, channel, nick):
@@ -39,22 +46,20 @@ class Guessnumber():
 			return
 			
 		try:
-			#print message
 			value = int(message)
 		except ValueError:
-			#self.ed.post(SendPrivmsgEvent(self.channel, "Please enter a number."))
 			return
-			
+
 		self.tries+=1
 			
 		if value == self.number:  # game won
-			self.ed.post(SendPrivmsgEvent(self.channel, "Congratulations " + nick + " you have guessed the right number and therefore won the game!"))
-			self.ed.post(SendPrivmsgEvent(self.channel, "It only took you %d tries!" % (self.tries, )))
+			self.ed.post(SendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_WIN % (nick, )))
+			self.ed.post(SendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_TRIES % (self.tries, )))
 			self.state = self.STATE_STOPPED
 		elif value > self.number:  # need to guess lower
-			self.ed.post(SendPrivmsgEvent(self.channel, nick + ": The number I'm thinking of is lower."))
+			self.ed.post(SendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_LOWER % (nick, )))
 		elif value < self.number:  # need to guess higher
-			self.ed.post(SendPrivmsgEvent(self.channel, nick + ": The number I'm thinking of is higher."))
+			self.ed.post(SendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_HIGHER % (nick, )))
 			
 			
 			
