@@ -6,7 +6,7 @@ from events import *
 import os, sys
 lib_path = os.path.abspath(os.path.join(".."))
 sys.path.append(lib_path)
-from moduleloader import load_modules, reload_modules
+import moduleloader
 from weakboundmethod import WeakBoundMethod as Wbm
 
 """
@@ -35,7 +35,7 @@ class Bot:
 	def start_modules(self, event):
 		if event.message == "modulereload":
 			return
-		self.modules = load_modules(self.ed)
+		self.modules = moduleloader.load_modules(self.ed)
 		self.ed.post(RunningEvent(self.ip))
 	
 	def connected(self, event):
@@ -45,7 +45,9 @@ class Bot:
 		if event.module == "core" or event.module == "all":
 			self.read_config()
 		if event.module == "modules":
-			self.modules = reload_modules(self.modules, self.ed)
+			self.modules = []
+			reload(moduleloader)
+			self.modules = moduleloader.reload_modules(self.modules, self.ed)
 	
 	def connection_closed(self, event):
 		if (event.type == "server" and self.reconnect) or event.type == "reconnect":
