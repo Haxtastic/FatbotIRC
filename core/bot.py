@@ -1,8 +1,9 @@
-import thread, atexit
+import thread, atexit, random
 import ConfigParser
 from connection import Connection
 from consoleview import ConsoleView
 from events import *
+from botinfo import read_config_section
 import os, sys
 lib_path = os.path.abspath(os.path.join(".."))
 sys.path.append(lib_path)
@@ -21,25 +22,18 @@ class Bot:
 	
 	def start(self):
 		self._connections = [
-			self.ed.add(ConnectedEvent, Wbm(self.connected)),
-			self.ed.add(WelcomeEvent, Wbm(self.start_modules)),
+			self.ed.add(ConnectedEvent, Wbm(self.start_modules)),
 			self.ed.add(ReloadconfigEvent, Wbm(self.reload_config)),
 			self.ed.add(ConnectionClosedEvent, Wbm(self.connection_closed))
 		]
-		self.config = ConfigParser.RawConfigParser()
 		self.read_config()
 		self.console = ConsoleView(self.ed)
 		self.server = Connection(self.ip, self.port, self.ed)
 		self.server.connect(self.ssl)
 	
 	def start_modules(self, event):
-		if event.message == "modulereload":
-			return
 		self.modules = moduleloader.load_modules(self.ed)
-		self.ed.post(RunningEvent(self.ip))
-	
-	def connected(self, event):
-		self.ed.post(LoginEvent(self.name))
+		LoginEvent(self.name).post(self.ed)
 	
 	def reload_config(self, event):
 		if event.module == "core" or event.module == "all":
@@ -53,7 +47,7 @@ class Bot:
 		if (event.type == "server" and self.reconnect) or event.type == "reconnect":
 			self.restart()
 		else:
-			self.ed.post(QuitEvent())
+			QuitEvent().post(self.ed)
 
 	def restart(self):
 		self._connections = None
@@ -63,10 +57,10 @@ class Bot:
 		self.start()
 	
 	def read_config(self):
-		self.config.read('config.cfg')
-		self.ip   		= self.config.get		("Connection", "ip")
-		self.port 		= self.config.getint	("Connection", "port")
-		self.name 		= self.config.get		("Connection", "name")
-		self.ssl 		= self.config.getint	("Connection", "ssl")
-		self.reconnect	= self.config.getint	("Connection", "reconnect")
+		config = read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.cfg"), "Connection")
+		self.ip			= config["prefix"][1] + config["ip"]#random.choice(config["prefix"]) + config["ip"]
+		self.port 		= config["port"][2]#random.choice(config["port"])
+		self.name 		= config["name"]
+		self.ssl 		= config["ssl"]
+		self.reconnect	= config["reconnect"]
 
