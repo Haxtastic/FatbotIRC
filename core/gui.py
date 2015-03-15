@@ -1,8 +1,6 @@
-import wx, time, thread, sys
-from events import QuitEvent, DisconnectEvent, ParsedPrivmsgEvent
+import wx, time, thread, sys, multiprocessing as mp, spinner
+from events import QuitEvent, RequestDisconnectEvent, ParsedPrivmsgEvent, Event, JoinEvent, PartEvent, RequestSendPrivmsgEvent
 from weakboundmethod import WeakBoundMethod as Wbm
-from eventdispatcher import EventDispatcher
-from spinner import Spinner
 		
 
 class Form(wx.Panel):
@@ -13,15 +11,14 @@ class Form(wx.Panel):
 
 	def __init__(self, *args, **kwargs):
 		super(Form, self).__init__(*args, **kwargs)
+		self.name = kwargs["name"]
 		self.createControls()
 		self.doLayout()
 		self.loggerLock = thread.allocate_lock()
 
 	def createControls(self):
 		self.logger = wx.TextCtrl(self, style=wx.TE_MULTILINE|wx.TE_READONLY)
-		self.editname = wx.TextCtrl(self)
-		#for i in range(0, 23):
-		#	 self.__log("\n")
+		self.editname = wx.TextCtrl(self, name=self.name)
 
 	def doLayout(self):
 		''' Layout the controls that were created by createControls(). 
@@ -34,7 +31,13 @@ class Form(wx.Panel):
 	def log(self, message):
 		self.loggerLock.acquire()
 		self.logger.AppendText(message+"\n")
-		self.logger.ScrollLines(-1)
+		#self.logger.ScrollLines(-1)
+		self.loggerLock.release()
+		
+	def page_change(self, event):
+		self.loggerLock.acquire()
+		#self.logger.ScrollLines(-1)
+		self.logger.AppendText("Paged changed")
 		self.loggerLock.release()
 
 
@@ -59,78 +62,160 @@ class FormWithSizer(Form):
 
 
 class FrameWithForms(wx.Frame):
-	def __init__(self, ed, *args, **kwargs):
+	def __init__(self, pipe, *args, **kwargs):
 		super(FrameWithForms, self).__init__(*args, **kwargs)
-		self.tabs = ["main", "server", "bot", "internal"]
-		self.ed = ed
-		notebook = wx.Notebook(self)
+		self.tabs = ["main", "server", "bot", "internal", "all"]
+		self.n_tabs = len(self.tabs)
+		self.pipe = pipe
+		self.command_history = []
+		self.command_position = 0
+		self.notebook = wx.Notebook(self)
 		self.forms = dict()
 		for tab in self.tabs:
-			self.forms[tab] = FormWithSizer(notebook, name=tab.capitalize())
-			self.forms[tab].editname.Bind(wx.EVT_CHAR_HOOK, self.onEnter)
-			notebook.AddPage(self.forms[tab], tab.capitalize())
-		self.SetClientSize(notebook.GetBestSize())
+			self.forms[tab] = FormWithSizer(self.notebook, name=tab.capitalize())
+			self.forms[tab].editname.Bind(wx.EVT_CHAR_HOOK, self.onEnter)#, self.forms[tab])
+			self.notebook.AddPage(self.forms[tab], tab.capitalize())
+			self.forms[tab].Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.forms[tab].page_change)
+		self.SetClientSize(self.notebook.GetBestSize())
 		self.Bind(wx.EVT_CLOSE, self.onCloseWindow)
+		self.alive = True
 		
-	def write(self, text):
-		if len(text) <= 1 or " " not in text or ":" not in text:
+	def write(self, data):
+		if len(data) <= 1 or " " not in data or ":" not in data:
 			return
-		time, origin = text.split(" ", 1)
+		time, origin = data.split(" ", 1)
 		origin, message = origin.split(":", 1)
 		message = time + message
 		if origin.lower() in self.forms:
 			self.forms[origin.lower()].log(message)
-		self.forms[self.tabs[0]].log(text)
+		if "main" not in origin.lower():
+			self.forms[self.tabs[4]].log(data)
 		
 	def onEnter(self, event):
-		if event.GetKeyCode()in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
+		if event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
 			textctrl = event.GetEventObject()
 			message = textctrl.GetValue().strip()
-			if " " not in message:
-				return
+			while len(self.command_history) >= 500:
+				self.command_history.pop(0)
+			if len(self.command_history) < 1 or self.command_history[-1] != message:
+				self.command_history.append(message)
+			self.command_position = 0
 			textctrl.SetValue("")
-			source = "Internal@Command"
-			nick = ""
-			channel = "Internal"
-			command = message.split(" ")
-			parameters = command[1:]
-			command = command[0].lower()
-			self.ed.post(ParsedPrivmsgEvent(nick, source, channel, message, command, parameters))
+			if message.startswith("/") or textctrl.GetName().lower() in self.tabs[:self.n_tabs]:
+				message.lstrip("/")
+				if " " not in message:
+					return
+				source = "Internal@Command"
+				nick = ""
+				channel = "Internal"
+				command = message.split(" ")
+				parameters = command[1:]
+				command = command[0].lower()
+				self.pipe.send(ParsedPrivmsgEvent(nick, source, channel, message, command, parameters))
+			else:
+				self.pipe.send(RequestSendPrivmsgEvent(textctrl.GetName(), message))
+		elif event.GetKeyCode() in [wx.WXK_UP]:
+			self.command_position+=1
+			if self.command_position > len(self.command_history):
+				self.command_position = len(self.command_history)
+			textctrl = event.GetEventObject()
+			command_index = len(self.command_history) - self.command_position
+			try:
+				textctrl.SetValue(self.command_history[command_index])
+			except IndexError:
+				textctrl.SetValue(str(command_index))
+			textctrl.SetInsertionPointEnd()
+		elif event.GetKeyCode() in [wx.WXK_DOWN]:
+			textctrl = event.GetEventObject()
+			self.command_position-=1
+			if self.command_position < 1:
+				self.command_position = 0
+				textctrl.SetValue("")
+				return
+			command_index = len(self.command_history) - self.command_position
+			textctrl.SetValue(self.command_history[command_index])
+			textctrl.SetInsertionPointEnd()
 		else:
 			event.Skip()
 
 	def onCloseWindow(self, event):
-		self.ed.post(DisconnectEvent("Can you see what's wrong?"))
-			
+		self.pipe.send(RequestDisconnectEvent("Can you see what's wrong?"))
+		self.alive = False
+		
 class GUIWindow(wx.App):
 	def OnInit(self):
 		wx.App.__init__(self, False)
-		self.ed = EventDispatcher()
-		self.frame = FrameWithForms(self.ed, None, title='FatbotIRC GUI')
+		self.parent_pipe, self.child_pipe = mp.Pipe()
+		self.redirecter = bothandler(self.child_pipe)
+		#self.redirecter.daemon = True
+		self.redirecter.start()
+		self.frame = FrameWithForms(self.parent_pipe, None, title='FatbotIRC GUI')
 		sys.stdout = self.frame
 		self.frame.Show()
 		self.SetTopWindow(self.frame)
 		return True
-	
+		
 	def run(self):
-		self.spinner = Spinner(self.ed)
 		evtloop = wx.EventLoop()
 		wx.EventLoop.SetActive(evtloop)
 		
-		self.spinner.bot.start()
-		
-		while self.spinner.alive is True:
-			self.ed.consume_event_queue()
+		while self.frame.alive:
 			while evtloop.Pending():
 				evtloop.Dispatch()
-				
+			while self.parent_pipe.poll():
+				buffer = self.parent_pipe.recv()
+				if not self.parse_event(buffer):
+					print buffer
 			time.sleep(0.01)
 			self.ProcessIdle()
+		
+	def parse_event(self, event):
+		if isinstance(event, JoinEvent):
+			tab = event.dest.lower()
+			self.frame.tabs.append(tab)
+			self.frame.forms[tab] = FormWithSizer(self.frame.notebook, name=tab.capitalize())
+			self.frame.forms[tab].editname.Bind(wx.EVT_CHAR_HOOK, self.frame.onEnter)#, self.frame.forms[tab])
+			self.frame.notebook.AddPage(self.frame.forms[tab], tab.capitalize())
+			self.frame.notebook.SendSizeEvent()
+		elif isinstance(event, PartEvent):
+			for index in range(self.frame.notebook.GetPageCount()):
+				if self.frame.notebook.GetPageText(index).lower() == event.dest.lower():
+					self.frame.notebook.DeletePage(index)
+					self.frame.notebook.SendSizeEvent()
+					break
+
+class bothandler(mp.Process):
 	
-			
+	def __init__(self, pipe):
+		mp.Process.__init__(self)
+		self.pipe = pipe
+		
+	def run(self):
+		sys.stdout = self
+		spin = spinner.Spinner()
+		self._con = [
+			spin.ed.add(JoinEvent, Wbm(self.write)),
+			spin.ed.add(PartEvent, Wbm(self.write))
+		]
+		while spin.tick():
+			if self.pipe.poll():
+				self.pipe.recv().post(spin.ed)
+			time.sleep(0.01)
+		
+	def write(self, data):
+		self.pipe.send(data)
+		return
+		
+		
 def main():
 	GUIWindow().run()
-			
-if __name__ == '__main__':
-	main()
-		
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
