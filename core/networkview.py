@@ -1,4 +1,5 @@
-from events import LoginEvent, PingEvent, JoinEvent, PartEvent, SendPrivmsgEvent, SendCommandEvent, DisconnectEvent, ReconnectEvent, OutputEvent, QuitEvent, TickEvent
+from events import RequestPongEvent, RequestJoinEvent, RequestPartEvent, RequestSendPrivmsgEvent, RequestSendCommandEvent, RequestDisconnectEvent, RequestReconnectEvent
+from events import LoginEvent, PongEvent, JoinEvent, PartEvent, SendPrivmsgEvent, SendCommandEvent, DisconnectEvent, ReconnectEvent, OutputEvent, QuitEvent, TickEvent
 from networkmessage import NetworkMessage
 from weakboundmethod import WeakBoundMethod as Wbm
 import thread, time
@@ -23,13 +24,13 @@ class NetworkView():
 		self.max_messages_per_second = 4
 		self._connections = [
 			self.ed.add(LoginEvent, Wbm(self.connect)),
-			self.ed.add(PingEvent, Wbm(self.ping)),
-			self.ed.add(JoinEvent, Wbm(self.join_channel)),
-			self.ed.add(PartEvent, Wbm(self.part_channel)),
-			self.ed.add(SendPrivmsgEvent, Wbm(self.send_message_event)),
-			self.ed.add(SendCommandEvent, Wbm(self.send_command)),
-			self.ed.add(DisconnectEvent, Wbm(self.disconnect)),
-			self.ed.add(ReconnectEvent, Wbm(self.reconnect)),
+			self.ed.add(RequestPongEvent, Wbm(self.pong)),
+			self.ed.add(RequestJoinEvent, Wbm(self.join_channel)),
+			self.ed.add(RequestPartEvent, Wbm(self.part_channel)),
+			self.ed.add(RequestSendPrivmsgEvent, Wbm(self.send_message_event)),
+			self.ed.add(RequestSendCommandEvent, Wbm(self.send_command)),
+			self.ed.add(RequestDisconnectEvent, Wbm(self.disconnect)),
+			self.ed.add(RequestReconnectEvent, Wbm(self.reconnect)),
 			self.ed.add(TickEvent, Wbm(self.consume_send_pool))
 		]
 		
@@ -38,7 +39,8 @@ class NetworkView():
 		
 	def on_send_message(self, msg): # Called by instance owner(connection) every time a message is sent
 		if msg.silent is False:
-			self.ed.post(OutputEvent("Bot", msg.buffer))
+			#self.ed.post(OutputEvent("Bot", msg.buffer))
+			OutputEvent("Bot", msg.buffer).post(self.ed)
 		msg.end_message()
 		
 	def connect(self, event):
@@ -47,6 +49,7 @@ class NetworkView():
 		self.send(msg)
 		msg = NetworkMessage()
 		msg.buffer = "NICK " + event.username
+		self.username = event.username
 		self.send(msg)
 		
 	def join_channel(self, event):
@@ -56,6 +59,7 @@ class NetworkView():
 		self.send(msg)
 		if event.master != "":
 			self.send_message(event.master, "Joining channel '%s', master!" % (channel), "")
+		JoinEvent(self.username, channel, event.master).post(self.ed)
 		
 	def part_channel(self, event):
 		msg = NetworkMessage()
@@ -64,6 +68,7 @@ class NetworkView():
 		self.send(msg)
 		if event.master != "":
 			self.send_message(event.master, "Parting channel '%s', master!" % (channel), "")
+		PartEvent(self.username, channel, event.master).post(self.ed)
 		
 	def send_command(self, event):
 		msg = NetworkMessage()
@@ -77,6 +82,7 @@ class NetworkView():
 		self.send(msg)
 		if event.master != "":
 			self.send_message(event.master, "Command '%s' sent with parameters '%s', master!" % (event.type, event.message), "")
+		SendCommandEvent(event.type, event.message, event.master).post(self.ed)
 
 	def send_message(self, dest, message, master):
 		msg = NetworkMessage()
@@ -84,12 +90,14 @@ class NetworkView():
 		self.send(msg)
 		if master != "":
 			self.send_message(master, "Message '%s' sent to '%s', master!" % (message, dest), "")
+		SendPrivmsgEvent(self.username, dest, message, master).post(self.ed)
 		
-	def ping(self, event):
+	def pong(self, event):
 		msg = NetworkMessage()
 		msg.buffer = "PONG :" + event.message
-		msg.silent = False
+		msg.silent = True
 		self.send(msg)
+		PongEvent(event.message).post(self.ed)
 		
 	def make_channel(self, channel):
 		if channel[0] != "#":
@@ -108,6 +116,8 @@ class NetworkView():
 				self.send_message(event.master, "Disconnecting with message '%s', master!" % (event.message), "")
 			msg.buffer = "QUIT :" + event.message
 			self.send(msg)
+			DisconnectEvent(event.message, event.master).post(self.ed)
+			
 
 	def reconnect(self, event):
 		msg = NetworkMessage(True, "reconnect")
@@ -116,7 +126,7 @@ class NetworkView():
 				self.send_message(event.master, "Reconnecting with message '%s', master!" % (event.message), "")
 			msg.buffer = "QUIT " + event.message
 			self.send(msg)
-			self.send_lock.release()
+			ReconnectEvent(event.message, event.master).post(self.ed)
 			
 	def consume_send_pool(self, event):
 		self.send_lock.acquire()
