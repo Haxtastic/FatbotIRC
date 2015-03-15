@@ -1,25 +1,25 @@
-import modules
 import sys, time
-from events import WelcomeEvent, OutputEvent
+from core.events import ReloadEvent
 """
 Our module loader class.
 It loads modules and reloads them simply put.
 """
 
 def load_modules(ed):
-	from modules import protocolirc, gamemanager, autopinger, performer, nickserv, privmsgparser, youtubehelper, reloadconfigresponder
+	from modules import protocolirc, gamemanager, autopinger, performer, nickserv, privmsgparser, urlparser, responder, messageformater
 	list = []
 	#  Load your modules here
 	list.append(protocolirc.protocolirc(ed))
 	list.append(gamemanager.gamemanager(ed))
-	list.append(youtubehelper.youtubehelper(ed))
+	list.append(urlparser.urlparser(ed))
 	list.append(autopinger.autopinger(ed))
 	list.append(performer.performer(ed))
-	#list.append(nickserv.nickserv(ed))
+	list.append(nickserv.nickserv(ed))
 	#list.append(oper.oper(ed))
 	#list.append(fridhemauth.fridhemauth(ed))
 	list.append(privmsgparser.privmsgparser(ed))
-	list.append(reloadconfigresponder.reloadconfigresponder(ed))
+	list.append(messageformater.messageformater(ed))
+	list.append(responder.responder(ed))
 	return list
 	
 def reload_modules(list, ed):
@@ -28,7 +28,5 @@ def reload_modules(list, ed):
 		del module
 		reload(sys.modules['modules.' + name])
 	list = load_modules(ed)
-	ed.post(WelcomeEvent("modulereload"))
-	return list
-	
-		
+	ReloadEvent().post(ed)
+	return list		
