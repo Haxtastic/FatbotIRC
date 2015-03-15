@@ -1,9 +1,7 @@
 # encoding: UTF-8
 import os, sys
-lib_path = os.path.abspath(os.path.join("..", "core"))
-sys.path.append(lib_path)
-from events import *
-from weakboundmethod import WeakBoundMethod as Wbm
+from core.events import *
+from core.weakboundmethod import WeakBoundMethod as Wbm
 
 class fridhemauth():
 	def __init__(self, ed):
@@ -18,8 +16,8 @@ class fridhemauth():
 		if self.started == False:
 			return
 		nick, source = event.source.split("!")
-		channel = event.channel
-		message = event.message
+		channel = event.dest
+		message = event.data
 		
 		# :Kek!Keke@somekind.ofspecial.mask PRIVMSG Fatbot :Hey
 		if channel != "#opers" or message.find(":<xmlrpc> REGISTER:") == -1:
@@ -31,5 +29,6 @@ class fridhemauth():
 		
 		mess = "flags #fridhem.priv %s +vV" % (parameters[1][1:-1])
 		#/msg chanserv flags #fridhem.priv nickpåreggadekontot +vV
-		self.ed.post(SendPrivmsgEvent("chanserv", mess, ""))
+		#self.ed.post(SendPrivmsgEvent("chanserv", mess, ""))
+		SendPrivmsgEvent("chanserv", mess, "").post(self.ed)
 		
