@@ -20,7 +20,11 @@ class NetworkMessage:
 		self.buffer = ""
 		
 	def end_message(self):
-		self.buffer+="\n"
+		self.buffer+='\n'
+		self.buffer = self.buffer.encode("utf-8")
 		
 	def strip_message(self):
-		self.buffer = self.buffer.strip('\n\r')
+		self.buffer = self.buffer.replace('\r', '').strip('\n')
+		
+	def prepare_message(self):
+		return filter(None, self.buffer.decode("utf-8").splitlines())#.replace('\r', '').strip('\n').split('\n')
