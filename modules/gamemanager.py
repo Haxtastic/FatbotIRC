@@ -1,10 +1,8 @@
 import os, sys
-lib_path = os.path.abspath(os.path.join("..", "core"))
-sys.path.append(lib_path)
-from events import *
+from core.events import *
 import ConfigParser
 from games import *
-from weakboundmethod import WeakBoundMethod as Wbm
+from core.weakboundmethod import WeakBoundMethod as Wbm
 
 class gamemanager():
 	def __init__(self, ed):
@@ -18,11 +16,11 @@ class gamemanager():
 		]
 		
 	def parse_privmsg(self, event):
-		if "!" not in event.source or ":" not in event.message:
+		if "!" not in event.source or ":" not in event.data:
 			return
 		nick, source = event.source.split("!", 1)
-		channel = event.channel
-		message = event.message.split(":", 1)[1]
+		channel = event.dest
+		message = event.data.split(":", 1)[1]
 		if channel[0] != "#":  # if the message isn't from a channel, the channel is the message owners nick
 			channel = nick
 		
@@ -30,7 +28,7 @@ class gamemanager():
 			self.games[source].process(message, channel, nick)
 			return
 		
-		if " " not in event.message:
+		if " " not in event.data:
 			return
 			
 		command = message.split(" ")

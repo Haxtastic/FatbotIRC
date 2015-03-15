@@ -1,9 +1,9 @@
 import os, sys
-lib_path = os.path.abspath(os.path.join("..", "..", "core"))
-sys.path.append(lib_path)
+#lib_path = os.path.abspath(os.path.join("..", "..", "core"))
+#sys.path.append(lib_path)
 import random
-from events import *
-from weakboundmethod import WeakBoundMethod as Wbm
+from core.events import *
+from core.weakboundmethod import WeakBoundMethod as Wbm
 
 class Guessnumber():
 	MESSAGE_WIN 		= "Congratulations %s you have guessed the right number and therefore won the game!"
@@ -28,17 +28,17 @@ class Guessnumber():
 			self.channel = self.realchannel
 			
 		if len(parameters) < 2:  # not enough parameters, output help
-			self.ed.post(SendPrivmsgEvent(channel, Guessnumber.MESSAGE_ERROR % (nick,)))
+			RequestSendPrivmsgEvent(channel, Guessnumber.MESSAGE_ERROR % (nick,)).post(self.ed)
 			return
 		try:
 			min = int(parameters[0])
 			max = int(parameters[1])
 		except ValueError:
-			self.ed.post(SendPrivmsgEvent(channel, Guessnumber.MESSAGE_ERROR % (nick,)))
+			RequestSendPrivmsgEvent(channel, Guessnumber.MESSAGE_ERROR % (nick,)).post(self.ed)
 			return
 		self.number = random.randint(min, max)
-		self.ed.post(SendPrivmsgEvent(channel, Guessnumber.MESSAGE_START % (nick, )))
-		self.ed.post(OutputEvent("Internal", Guessnumber.MESSAGE_INTERNAL % (nick, self.number)))
+		RequestSendPrivmsgEvent(channel, Guessnumber.MESSAGE_START % (nick, )).post(self.ed)
+		OutputEvent("Internal", Guessnumber.MESSAGE_INTERNAL % (nick, self.number)).post(self.ed)
 		self.state = self.STATE_RUNNING
 		
 	def process(self, message, channel, nick):
@@ -53,13 +53,13 @@ class Guessnumber():
 		self.tries+=1
 			
 		if value == self.number:  # game won
-			self.ed.post(SendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_WIN % (nick, )))
-			self.ed.post(SendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_TRIES % (self.tries, )))
+			RequestSendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_WIN % (nick, )).post(self.ed)
+			RequestSendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_TRIES % (self.tries, )).post(self.ed)
 			self.state = self.STATE_STOPPED
 		elif value > self.number:  # need to guess lower
-			self.ed.post(SendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_LOWER % (nick, )))
+			RequestSendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_LOWER % (nick, )).post(self.ed)
 		elif value < self.number:  # need to guess higher
-			self.ed.post(SendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_HIGHER % (nick, )))
+			RequestSendPrivmsgEvent(self.channel, Guessnumber.MESSAGE_HIGHER % (nick, )).post(self.ed)
 			
 			
 			
