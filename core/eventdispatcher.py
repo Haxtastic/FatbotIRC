@@ -1,4 +1,4 @@
-from events import OutputEvent, TickEvent, ListenerPrintEvent, PrivmsgEvent
+import events
 import thread, time
 from weakboundmethod import WeakBoundMethod as Wbm
 
@@ -26,11 +26,11 @@ class EventDispatcher:
 	"""
 	def __init__(self):
 		self._listeners = dict()
-		self.eventQueue = []
 		self.nextQueue = []
 		self.postLock = thread.allocate_lock()
 		self.tickFreq = 0.5
 		self.lastTick = time.time()
+		self.botInfo = dict()
 	
 	def add(self, eventcls, listener):
 		self._listeners.setdefault(eventcls, list()).append(listener)
@@ -40,18 +40,18 @@ class EventDispatcher:
 		self.postLock.acquire()
 		self.nextQueue.append(event)
 		if not event.silent:
-			self.nextQueue.append(OutputEvent("Internal", event.name))
+			self.nextQueue.append(events.OutputEvent("Internal", event.name))
 		self.postLock.release()
 	
 	def consume_event_queue(self): # Actually dispatch the events
 		self.postLock.acquire()
-		self.eventQueue = self.nextQueue
+		eventQueue = self.nextQueue
 		self.nextQueue = []
 		self.postLock.release()
 		if(time.time() - self.lastTick > self.tickFreq):
-			self.eventQueue.append(TickEvent())
+			eventQueue.append(events.TickEvent())
 			self.lastTick = time.time()
-		for event in self.eventQueue:
+		for event in eventQueue:
 			try:
 				for listener in self._listeners[event.__class__]:
 					#if isinstance(event, TickEvent):
@@ -60,5 +60,4 @@ class EventDispatcher:
 					#	thread.start_new_thread(listener, (event, ))
 			except KeyError:
 				pass # No listener interested in this event
-
-		
+				
