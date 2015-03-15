@@ -38,3 +38,6 @@ PART
 You can create your own events by adding them to events.py  
 You can then send out the event by registering a listener to the EventManager and posting the event.  
 How you do this can be viewed in the source of most files.  
+
+Fatbot Slim for IRC is licensed under the [Apache 2 License](http://www.apache.org/licenses/LICENSE-2.0.html), meaning you
+can use it free of charge, without strings attached in commercial and non-commercial projects.
