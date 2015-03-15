@@ -1,23 +1,28 @@
 import os, sys
-lib_path = os.path.abspath(os.path.join("..", "core"))
-sys.path.append(lib_path)
-from events import *
+from core.events import *
 import ConfigParser
-from weakboundmethod import WeakBoundMethod as Wbm
+from core.weakboundmethod import WeakBoundMethod as Wbm
+from core.botinfo import read_config_section
 
 class performer():
 	def __init__(self, ed):
 		self.ed = ed
 		self.read_config()
 		self._connections = [
-			self.ed.add(PerformEvent, Wbm(self.perform))
+			self.ed.add(NoticeEvent, Wbm(self.notice)),
+			self.ed.add(HosthiddenEvent, Wbm(self.perform))
 		]
+		
+	def notice(self, event):
+		if "quakenet.org" in event.source.lower() or "are now logged in" not in event.data:
+			return
+		self.perform(event)
 		
 	def perform(self, event):
 		for channel in self.channels:
-			self.ed.post(JoinEvent(channel))
+			RequestJoinEvent(channel).post(self.ed)
 			
 	def read_config(self):
-		self.config = ConfigParser.RawConfigParser()
-		self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
-		self.channels = self.config.get("performer", "channels").replace(" ", "").split(",")
+		config = read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'), "performer")
+		#self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
+		self.channels = config["channels"]

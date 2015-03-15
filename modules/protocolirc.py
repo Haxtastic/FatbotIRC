@@ -1,9 +1,8 @@
 import os, sys
-lib_path = os.path.abspath(os.path.join("..", "core"))
-sys.path.append(lib_path)
-from events import *
+from core.events import ParsedPrivmsgEvent, ReloadconfigEvent, RequestJoinEvent, RequestPartEvent, RequestSendPrivmsgEvent, ReloadconfigEvent, RequestDisconnectEvent, RequestReconnectEvent, RequestSendCommandEvent 
+from core.botinfo import read_config_section
 import ConfigParser
-from weakboundmethod import WeakBoundMethod as Wbm
+from core.weakboundmethod import WeakBoundMethod as Wbm
 
 class protocolirc():
 	def __init__(self, ed):
@@ -28,29 +27,36 @@ class protocolirc():
 			parameters = parameters[1:]
 		
 		if command == "join":  # channel
-			self.ed.post(JoinEvent(parameters[0], nick))
+			#self.ed.post(JoinEvent(parameters[0], nick))
+			RequestJoinEvent(parameters[0], nick).post(self.ed)
 		elif command == "part":  # channel
-			self.ed.post(PartEvent(parameters[0], nick))
+			#self.ed.post(PartEvent(parameters[0], nick))
+			RequestPartEvent(parameters[0], nick).post(self.ed)
 		elif command == "send":  # destination, message
 			text = ""
 			for word in parameters[1:]:
 				text += "%s " % (word, )
-			self.ed.post(SendPrivmsgEvent(parameters[0], text.strip(), nick))
+			#self.ed.post(SendPrivmsgEvent(parameters[0], text.strip(), nick))
+			RequestSendPrivmsgEvent(parameters[0], text.strip(), nick).post(self.ed)
 		elif command == "reloadconfig":  # list of modules to reload
 			for module in parameters:
-				self.ed.post(ReloadconfigEvent(module, nick))
+				#self.ed.post(ReloadconfigEvent(module, nick))
+				ReloadconfigEvent(module, nick).post(self.ed)
 		elif command == "disconnect" or command == "reconnect":
 			text = ""
 			for word in parameters:
 				text += "%s " % (word, )
 			text = text.strip()
 			if command == "disconnect":
-				self.ed.post(DisconnectEvent(text, nick))
+				#self.ed.post(DisconnectEvent(text, nick))
+				RequestDisconnectEvent(text, nick).post(self.ed)
 			elif command == "reconnect":
-				self.ed.post(ReconnectEvent(text, nick))
+				#self.ed.post(ReconnectEvent(text, nick))
+				RequestReconnectEvent(text, nick).post(self.ed)
 			return
 		elif command == "command":
-			self.ed.post(SendCommandEvent(parameters[0], parameters[1:]))
+			#self.ed.post(SendCommandEvent(parameters[0], parameters[1:]))
+			RequestSendCommandEvent(parameters[0], parameters[1:]).post(self.ed)
 		elif command == "execute":
 			exec(" ".join(parameters))
 			
@@ -65,7 +71,7 @@ class protocolirc():
 		return False
 			
 	def read_config(self):
-		self.config = ConfigParser.RawConfigParser()
-		self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
-		self.masters = self.config.get("protocolirc", "masters").replace(" ", "").split(",")
+		config = read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'), "protocolirc")
+		#self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
+		self.masters = config["masters"]
 			

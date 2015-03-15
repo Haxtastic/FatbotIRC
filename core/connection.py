@@ -2,7 +2,7 @@ import thread, socket, ssl
 from networkview import NetworkView
 from networkcontroller import NetworkController
 from networkmessage import NetworkMessage
-from events import ConnectedEvent, OutputEvent, ConnectionClosedEvent, DisconnectEvent
+from events import ConnectedEvent, OutputEvent, ConnectionClosedEvent, RequestDisconnectEvent
 """
 Our connection class.
 This class handles all the underlying data transfer between the bot and the server.
@@ -23,6 +23,7 @@ class Connection:
 		self.ssl = None
 		
 	def connect(self, use_ssl=False):
+		print self.host
 		self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		if use_ssl:
 			self.ssl = ssl.wrap_socket(self.socket, ssl_version=ssl.PROTOCOL_SSLv23)
@@ -30,7 +31,8 @@ class Connection:
 		else:
 			self.socket.connect(self.host)
 		thread.start_new_thread(self.parse_packet, ())
-		self.ed.post(ConnectedEvent())
+		#self.ed.post(ConnectedEvent())
+		ConnectedEvent().post(self.ed)
 		return
 
 	def check_state(self):
@@ -72,8 +74,10 @@ class Connection:
 			else:
 				self.socket.close()
 		except socket.error, msg:
-			self.ed.post(OutputEvent("Internal", msg))
-		self.ed.post(ConnectionClosedEvent(type))
+			#self.ed.post(OutputEvent("Internal", msg))
+			OutputEvent("Internal", msg).post(self.ed)
+		#self.ed.post(ConnectionClosedEvent(type))
+		ConnectionClosedEvent(type).post(self.ed)
 		self.connectionLock.release()
 		return True
 			

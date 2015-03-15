@@ -16,7 +16,7 @@ class OutputView:
 		self.queueLock.acquire()
 		y, m, d, h, m, s, wd, yd, isdst = time.localtime()
 		text = "%02d:%02d:%02d %s: %s" % (h, m, s, output.origin.upper(), output.text)
-		self.ed.post(PrintEvent(output.text)
+		PrintEvent(output.text).post(self.ed)
 		self.queueLock.release()
 		
 	

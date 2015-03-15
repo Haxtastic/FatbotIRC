@@ -1,9 +1,8 @@
 import os, sys
-lib_path = os.path.abspath(os.path.join("..", "core"))
-sys.path.append(lib_path)
-from events import TickEvent, PingEvent, ReloadconfigEvent, ListenerPrintEvent
+from core.events import TickEvent, RequestPongEvent, ReloadconfigEvent
 import ConfigParser, time
-from weakboundmethod import WeakBoundMethod as Wbm
+from core.weakboundmethod import WeakBoundMethod as Wbm
+from core.botinfo import read_config_section
 
 class autopinger():
 	def __init__(self, ed):
@@ -13,7 +12,7 @@ class autopinger():
 		self._connections = [
 			self.ed.add(TickEvent, Wbm(self.ping)),
 			self.ed.add(ReloadconfigEvent, Wbm(self.reload_config)),
-			self.ed.add(PingEvent, Wbm(self.reset))
+			self.ed.add(RequestPongEvent, Wbm(self.reset))
 		]
 
 	def reset(self, event):
@@ -21,13 +20,14 @@ class autopinger():
 		
 	def ping(self, event):
 		if time.time() - self.lastPing > self.timeout:
-			self.ed.post(PingEvent("trail and error..."))
+			#self.ed.post(PongEvent("trail and error..."))
+			RequestPongEvent("trail and error...").post(self.ed)
 			
 	def reload_config(self, event):
 		if event.module == "autopinger" or event.module == "all":
 			self.read_config()
 	
 	def read_config(self):
-		self.config = ConfigParser.RawConfigParser()
-		self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
-		self.timeout = self.config.getint("autopinger", "timeout") + 2
+		config = read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'), "autopinger")
+		#self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
+		self.timeout = config["timeout"] + 2

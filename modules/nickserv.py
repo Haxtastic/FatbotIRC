@@ -1,26 +1,35 @@
 import os, sys
-lib_path = os.path.abspath(os.path.join("..", "core"))
-sys.path.append(lib_path)
-from events import *
+from core.events import *
 import ConfigParser
-from weakboundmethod import WeakBoundMethod as Wbm
+from core.weakboundmethod import WeakBoundMethod as Wbm
+from core.botinfo import read_config_section
 
 class nickserv():
 	def __init__(self, ed):
 		self.ed = ed
 		self.read_config()
 		self._connections = [
-			self.ed.add(RunningEvent, Wbm(self.identify))
+			self.ed.add(ReginfoEvent, Wbm(self.identify)),
+			self.ed.add(NoticeEvent, Wbm(self.hostmask))
 		]
 		
 	def identify(self, event):
-		if event.host.find("quakenet") != -1:
-			self.ed.post(SendPrivmsgEvent("Q@Cserve.quakenet.org", "auth %s %s" % (self.nick, self.password)))
+		if event.type != "001":
+			return
+		if "quakenet" in event.source:
+			RequestSendPrivmsgEvent("Q@Cserve.quakenet.org", "auth %s %s" % (self.nick, self.password)).post(self.ed)
+		elif "dream-irc" in event.source:
+			RequestSendPrivmsgEvent("nickserv", "identify %s" % (self.password, ), "").post(self.ed)
 		else:
-			self.ed.post(SendPrivmsgEvent("nickserv", "identify %s %s" % (self.nick, self.password), ""))
+			RequestSendPrivmsgEvent("nickserv", "identify %s %s" % (self.nick, self.password), "").post(self.ed)
+			
+	def hostmask(self, event):
+		if "are now logged in" not in event.data:
+			return
+		name = event.dest
+		RequestSendCommandEvent("MODE", "%s +x" % name, "").post(self.ed)
 			
 	def read_config(self):
-		self.config = ConfigParser.RawConfigParser()
-		self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
-		self.nick = self.config.get("nickserv", "nick")
-		self.password = self.config.get("nickserv", "password")
+		config = read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'), "nickserv")
+		self.nick = config["nick"]
+		self.password = config["password"]

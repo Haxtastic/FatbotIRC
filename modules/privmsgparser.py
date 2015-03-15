@@ -1,9 +1,10 @@
 import os, sys
-lib_path = os.path.abspath(os.path.join("..", "core"))
-sys.path.append(lib_path)
-from events import *
+#lib_path = os.path.abspath(os.path.join("..", "core"))
+#sys.path.append(lib_path)
+from core.events import *
 import ConfigParser
-from weakboundmethod import WeakBoundMethod as Wbm
+from core.weakboundmethod import WeakBoundMethod as Wbm
+from core.botinfo import read_config_section
 
 class privmsgparser():
 	def __init__(self, ed):
@@ -13,11 +14,11 @@ class privmsgparser():
 		]
 		
 	def parse_privmsg(self, event):
-		if " " not in event.message:
+		if " " not in event.data:
 			return
 		nick, source = event.source.split("!")
-		command = event.message.split(" ")
+		command = event.data.split(" ")
 		parameters = command[1:]
 		command = command[0].split(":")[1].lower()  # Get rid of the : at start and no caps
-		message = event.message.split(":")[1]
-		self.ed.post(ParsedPrivmsgEvent(nick, source, event.channel, message, command, parameters))
+		message = event.data.split(":")[1]
+		ParsedPrivmsgEvent(nick, source, event.dest, message, command, parameters).post(self.ed)
