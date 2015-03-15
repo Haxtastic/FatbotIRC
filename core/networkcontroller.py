@@ -1,5 +1,6 @@
-from events import PingEvent, OutputEvent, WelcomeEvent, OperEvent, PerformEvent, PrivmsgEvent, SendCommandEvent, ConnectionClosedEvent
+from events import NoticeEvent, ModeEvent, RequestPongEvent, OutputEvent, ReginfoEvent, OperEvent, PerformEvent, PrivmsgEvent, RequestSendCommandEvent, ConnectionClosedEvent, NoexistEvent, HosthiddenEvent, JoinedEvent, PartedEvent
 from networkmessage import NetworkMessage
+from weakboundmethod import WeakBoundMethod as Wbm
 
 class NetworkController():
 	"""
@@ -11,54 +12,77 @@ class NetworkController():
 	"""
 	def __init__(self, ed):
 		self.ed = ed
+		self.accumulator = ""
+		self.parsers = {
+			"NOTICE"	: Wbm(self.parse_notice),
+			"AUTH"		: Wbm(self.parse_notice),
+			"001"		: Wbm(self.parse_reginfo),
+			"002"		: Wbm(self.parse_reginfo),
+			"003"		: Wbm(self.parse_reginfo),
+			"004"		: Wbm(self.parse_reginfo),
+			"005"		: Wbm(self.parse_reginfo),
+			"396"		: Wbm(self.parse_hosthidden),
+			"401"		: Wbm(self.parse_noexist),
+			"PRIVMSG"	: Wbm(self.parse_privmsg),
+			"MODE"		: Wbm(self.parse_mode),
+			"JOIN"		: Wbm(self.parse_joined),
+			"PART"		: Wbm(self.parse_parted)
+		}
 		
 	def on_recv_message(self, msg):
-		msg.strip_message()
-		messages = msg.buffer.split("\n")
-		for text in messages:
-			self.parse_packet(text)
-		
-	def parse_packet(self, buffer):
-		#source, command, data
-		parameters = buffer.split(" ", 3)
-		if parameters[0].find(":") != -1:
-			parameters[0] = parameters[0].split(":")[1]  # Get rid of the : at the start of the message
-		if parameters[0] == "PING":
-			parameters[1] = parameters[1].split(":")[1]
-			self.ed.post(PingEvent(parameters[1]))
-			return
-		elif parameters[0] == "ERROR":
-			self.ed.post(OutputEvent("Internal", buffer.strip()))
-			self.ed.post(ConnectionClosedEvent("server"))
-			return
-		self.ed.post(OutputEvent("Server", buffer.strip())) # Print message
-		if len(parameters) < 2: # Two is too few parameters hurrhurr
-			try:
-				if len(parameters) == 2:
-					error = "Error: [NetworkController::parse_packet] parameters[0] = %s parameters[1] = %s" % (parameters[0], parameters[1])
-				else:
-					error = "Error: [NetworkController::parse_packet] parameters[0] = %s" % parameters[0]
-			except TypeError:
-				error = "Error: [NetworkController::parse_packet] TypeError when formatting parameters string"
-			self.ed.post(OutputEvent("Internal", error))
-		elif len(parameters) > 3 and parameters[1] == "NOTICE":
-			if parameters[3].find("You are now logged in as") != -1:
-				name = parameters[3].split(":You are now logged in as")[1].split(".")[0].strip()
-				self.ed.post(SendCommandEvent("MODE", "%s +x" % name, ""))
-		#Welcome message
-		elif parameters[1] == "001":  # message
-			self.ed.post(WelcomeEvent(parameters[3]))
-		#Mask Hostname successful:
-		elif parameters[1] == "396":
-			self.ed.post(PerformEvent(parameters[3]))
-		#Auth successful message
-		elif parameters[1] == "900":  # message
-			self.ed.post(OperEvent(parameters[3]))
-		#Oper successful message
-		elif parameters[1] == "381":  # message
-			self.ed.post(PerformEvent(parameters[3]))
-		#PRIVMSG
-		elif parameters[1] == "PRIVMSG":  # Source	 channel 		message
-			self.ed.post(PrivmsgEvent(parameters[0], parameters[2], parameters[3]))
+		msg.buffer = self.accumulator + msg.buffer
+		lines = msg.prepare_message()
+		self.accumulator = "" if msg.buffer.endswith("\r\n") else lines.pop()
+		for line in lines:
+			self.parse_message(line.lstrip(":"))
 			
+	def parse_message(self, buffer):
+		if buffer.count(" ") < 2:
+			command, data = buffer.split(" ", 1)
+			if command == "PING":
+				return RequestPongEvent(data.lstrip(":")).post(self.ed)
+			elif command == "ERROR":
+				OutputEvent("Internal", buffer.strip()).post(self.ed)
+				ConnectionClosedEvent("server").post(self.ed)
+				return
+			else:
+				try:
+					error = "Error: [NetworkController::parse_packet] command = %s data = %s" % (command, data)
+				except TypeError:
+					error = "Error: [NetworkController::parse_packet] TypeError when formatting parameters string"
+				OutputEvent("Internal", error).post(self.ed)
+			
+		OutputEvent("Server", buffer.strip()).post(self.ed) # Print message
 		
+		if buffer.count(" ") < 3:
+			source, type, dest = buffer.split(" ", 2)
+			data = ""
+		else:
+			source, type, dest, data = buffer.split(" ", 3) # source, type, dest, data
+		
+		if type in self.parsers.keys():
+			self.parsers[type](source, type, dest, data)
+		
+	def parse_notice(self, source, type, dest, data):
+		NoticeEvent(source, type, dest, data).post(self.ed)
+		
+	def parse_reginfo(self, source, type, dest, data):
+		ReginfoEvent(source, type, dest, data).post(self.ed)
+	
+	def parse_mode(self, source, type, dest, data):
+		ModeEvent(source, type, dest, data).post(self.ed)
+		
+	def parse_privmsg(self, source, type, dest, data):
+		PrivmsgEvent(source, dest, data).post(self.ed)
+	
+	def parse_noexist(self, source, type, dest, data):
+		NoexistEvent(source, dest, data).post(self.ed)
+		
+	def parse_hosthidden(self, source, type, dest, data):
+		HosthiddenEvent(source, dest, data).post(self.ed)
+	
+	def parse_joined(self, source, type, dest, data):
+		JoinedEvent(source, type, dest, data).post(self.ed)
+	
+	def parse_parted(self, source, type, dest, data):
+		PartedEvent(source, type, dest, data).post(self.ed)
