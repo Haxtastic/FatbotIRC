@@ -11,6 +11,15 @@ To run terminal just run main.py.
 To run with GUI (wxPython) then you can either run gui.py or main.py with parameter gui, e.g. "python main.py gui"  
   
 The bot will send out events for everything that happens with the appropriate information, currently:  
+
+LoginEvent:
+  This event gets posted when we request a login to the server.
+  This should not be processed by modules, but could if they keep statistics or the like.
+  
+JoinEvent:
+  This event gets posted when the bot requests to join a channel.
+  
+
    
 PRIVMSG  
   This event gets sent out when a PRIVMSG is received.  
