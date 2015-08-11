@@ -1,5 +1,5 @@
 import ConfigParser, json, os
-#"ed" : EventDispatcher, "nick" : "", "hostmask" : "", "channels" : []
+
 bot_info = dict()
 
 def read_config(config_dir, config_name):
