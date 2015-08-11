@@ -1,5 +1,5 @@
 """
-Copyright 2014 Magnus Bridén
+Copyright 2014 Magnus Briden
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import thread, atexit
-import ConfigParser
+#import ConfigParser
 from connection import Connection
 from consoleview import ConsoleView
 from events import *
-from botinfo import read_config_section
+#from botinfo import bot_info
 import os, sys
 lib_path = os.path.abspath(os.path.join(".."))
 sys.path.append(lib_path)
 import moduleloader
+from botinfo import bot_info
 from weakboundmethod import WeakBoundMethod as Wbm
 
 """
@@ -72,7 +73,7 @@ class Bot:
 		self.start()
 	
 	def read_config(self):
-		config = read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.cfg"), "Connection")
+		config = bot_info["core"]["Connection"]#read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.cfg"), "Connection")
 		self.ip			= config["prefix"][1] + config["ip"]#random.choice(config["prefix"]) + config["ip"]
 		self.port 		= config["port"][2]#random.choice(config["port"])
 		self.name 		= config["name"]

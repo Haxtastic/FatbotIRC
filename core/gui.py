@@ -143,13 +143,15 @@ class FrameWithForms(wx.Frame):
 		self.alive = False
 		
 class GUIWindow(wx.App):
-	def OnInit(self):
+	def __init__(self, name):
+		self.name = name
 		wx.App.__init__(self, False)
+	def OnInit(self):
 		self.parent_pipe, self.child_pipe = mp.Pipe()
 		self.redirecter = bothandler(self.child_pipe)
 		#self.redirecter.daemon = True
 		self.redirecter.start()
-		self.frame = FrameWithForms(self.parent_pipe, None, title='FatbotIRC GUI')
+		self.frame = FrameWithForms(self.parent_pipe, None, title='FatbotIRC GUI as ' + self.name)
 		sys.stdout = self.frame
 		self.frame.Show()
 		self.SetTopWindow(self.frame)
@@ -208,7 +210,8 @@ class bothandler(mp.Process):
 		
 		
 def main():
-	GUIWindow().run()
+	print botinfo.bot_info["core"]
+	#GUIWindow().run()
 
 	
 	

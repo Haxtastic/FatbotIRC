@@ -1,5 +1,5 @@
 """
-Copyright 2014 Magnus Bridén
+Copyright 2014 Magnus Briden
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,12 +22,13 @@ It loads modules and reloads them simply put.
 """
 
 def load_modules(ed):
-	from modules import protocolirc, gamemanager, autopinger, performer, nickserv, privmsgparser, urlparser, responder, messageformater
+	from modules import protocolirc, gamemanager, autopinger, performer, nickserv, privmsgparser, responder, messageformater
+	#urlparser
 	list = []
 	#  Load your modules here
 	list.append(protocolirc.protocolirc(ed))
 	list.append(gamemanager.gamemanager(ed))
-	list.append(urlparser.urlparser(ed))
+	#list.append(urlparser.urlparser(ed))
 	list.append(autopinger.autopinger(ed))
 	list.append(performer.performer(ed))
 	list.append(nickserv.nickserv(ed))
