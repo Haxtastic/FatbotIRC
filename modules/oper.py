@@ -18,6 +18,10 @@ import os, sys
 from core.events import *
 import ConfigParser
 from core.weakboundmethod import WeakBoundMethod as Wbm
+import os, sys
+lib_path = os.path.abspath(os.path.join(".."))
+sys.path.append(lib_path)
+from botinfo import bot_info
 
 class oper():
 	def __init__(self, ed):
@@ -32,7 +36,8 @@ class oper():
 		SendCommandEvent("OPER", "%s %s" % (self.nick, self.password), "").post(self.ed)
 			
 	def read_config(self):
-		config = read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'), "oper")
+		#config = read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'), "oper")
+		config 				= bot_info["oper"];
 		#self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
 		self.nick = config["nick"]
 		self.password = config["password"]

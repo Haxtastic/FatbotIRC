@@ -130,6 +130,7 @@ class NetworkView():
 			
 	def consume_send_pool(self, event):
 		self.send_lock.acquire()
+        
 		if time.time() - self.message_time > (1000/self.max_messages_per_second):
 			self.message_time = time.time()
 			self.messages_sent = max(self.messages_sent-1, 0)
@@ -137,7 +138,7 @@ class NetworkView():
 		if len(self.send_queue) <= 0 or not self.connection or self.messages_sent >= self.max_messages_per_second:
 			self.send_lock.release()
 			return
-			
+            
 		msg = self.send_queue.pop(0)
 		self.connection.send(msg)
 		if msg.dc_send:

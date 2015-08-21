@@ -1,19 +1,19 @@
 ([^\n\S]*)(?<!#)(self.ed.post\((.*?)\))\n
-	Ignores line if # before main body
-	1: Tabs before main body
-	2: Main body e.g. self.ed.post(PongEvent())
-	3: Inside post body e.g. PongEvent()
-	Use $1#$2\n$1$4\.post\(\)\n to add # before self.ed.post(PongEvent()) and put PongEvent().post() on a newline
-	
+    Ignores line if # before main body
+    1: Tabs before main body
+    2: Main body e.g. self.ed.post(PongEvent())
+    3: Inside post body e.g. PongEvent()
+    Use $1#$2\n$1$4\.post\(\)\n to add # before self.ed.post(PongEvent()) and put PongEvent().post() on a newline
+    
 self.ed.post\((.*?)\)\n
-	Eats newline so you need to supply it if you are 
-	1. Extracts anything from self.ed.post(*EXTRACTS THIS*)\n
-	Use $1\.post\(\)\n to replace self.ed.post(*ANYTHING*) with *ANYTHING*.post(). E.g self.ed.post(PongEvent()) becomes PongEvent().post()
-	
+    Eats newline so you need to supply it if you are 
+    1. Extracts anything from self.ed.post(*EXTRACTS THIS*)\n
+    Use $1\.post\(\)\n to replace self.ed.post(*ANYTHING*) with *ANYTHING*.post(). E.g self.ed.post(PongEvent()) becomes PongEvent().post()
+    
 ([^\s]*?\(.*)\.post\(\)
-	Use self\.ed\.post\($1\) to replace *ANYTHING*.post() with self.ed.post(*ANYTHING*)
-	1. Extracts anything that is not whitelines before .post()
-	
+    Use self\.ed\.post\($1\) to replace *ANYTHING*.post() with self.ed.post(*ANYTHING*)
+    1. Extracts anything that is not whitelines before .post()
+    
 self\.config\.get.*?\((.*?),\s(.*?)\)
-	1. Extracts *SECTION*
-	2. Extracts *OPTION*
+    1. Extracts *SECTION*
+    2. Extracts *OPTION*

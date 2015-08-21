@@ -19,12 +19,12 @@ from connection import Connection
 from consoleview import ConsoleView
 from events import *
 #from botinfo import bot_info
+from weakboundmethod import WeakBoundMethod as Wbm
 import os, sys
 lib_path = os.path.abspath(os.path.join(".."))
 sys.path.append(lib_path)
-import moduleloader
 from botinfo import bot_info
-from weakboundmethod import WeakBoundMethod as Wbm
+import moduleloader
 
 """
 Our main bot class. This is where we load modules, change the state of the bot, connect to the server etc.
@@ -73,10 +73,10 @@ class Bot:
 		self.start()
 	
 	def read_config(self):
-		config = bot_info["core"]["Connection"]#read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.cfg"), "Connection")
+		config 			= bot_info["Connection"]#read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.cfg"), "Connection")
 		self.ip			= config["prefix"][1] + config["ip"]#random.choice(config["prefix"]) + config["ip"]
 		self.port 		= config["port"][2]#random.choice(config["port"])
-		self.name 		= config["name"]
+		self.name 		= bot_info["General"]["name"]
 		self.ssl 		= config["ssl"]
 		self.reconnect	= config["reconnect"]
 

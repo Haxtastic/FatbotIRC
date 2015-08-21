@@ -20,7 +20,10 @@ import os, sys
 from core.events import *
 import ConfigParser
 from core.weakboundmethod import WeakBoundMethod as Wbm
-from core.botinfo import read_config_section
+import os, sys
+lib_path = os.path.abspath(os.path.join(".."))
+sys.path.append(lib_path)
+from botinfo import bot_info
 
 class privmsgparser():
 	def __init__(self, ed):

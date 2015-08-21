@@ -15,24 +15,42 @@ limitations under the License.
 """
 # encoding: UTF-8
 import os, sys
-from core.events import ReloadconfigEvent, RequestSendPrivmsgEvent, ReginfoEvent
+from core.events import ReloadconfigEvent, RequestSendPrivmsgEvent, ReginfoEvent, ParsedPrivmsgEvent
 from core.weakboundmethod import WeakBoundMethod as Wbm
 
 class responder():
-	def __init__(self, ed):
-		self.ed = ed
-		self._connections = [
-			self.ed.add(ReloadconfigEvent, Wbm(self.config)),
-			self.ed.add(ReginfoEvent, Wbm(self.module))
-		]
-	
-	def config(self, event):
-		if event.module == "modules":
-			return
-			RequestSendPrivmsgEvent(event.master, "Configurations reloaded, master!").post(self.ed)
-		
-	def module(self, event):
-		pass
-		#if event.message != "modulereload":
-		#	return
-		#self.ed.post(SendPrivmsgEvent(event.master, "Modules reloaded, master!"))
+    def __init__(self, ed):
+        self.ed = ed
+        self.respond = False
+        self.what = ""
+        self._connections = [
+            self.ed.add(ReloadconfigEvent, Wbm(self.config)),
+            self.ed.add(ReginfoEvent, Wbm(self.module)),
+            self.ed.add(ParsedPrivmsgEvent, Wbm(self.respond_method))
+        ]
+        
+        
+    def respond_method(self, event):
+        nick, source = event.nick, event.source
+        channel, message = event.channel, event.message
+        command, parameters = event.command, event.parameters
+        
+        if self.respond:
+            RequestSendPrivmsgEvent(nick, self.what).post(self.ed)
+        
+    
+    def config(self, event):
+        if event.module == "modules":
+            RequestSendPrivmsgEvent(event.master, "Configurations reloaded, master!").post(self.ed)
+        elif event.module == "responder":
+            self.respond ^= True
+            text = ""
+            for word in event.master:
+                text += "%s " % (word, )
+            self.what = text.strip()
+        
+    def module(self, event):
+        pass
+        #if event.message != "modulereload":
+        #   return
+        #self.ed.post(SendPrivmsgEvent(event.master, "Modules reloaded, master!"))

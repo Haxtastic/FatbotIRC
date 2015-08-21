@@ -123,7 +123,7 @@ class RequestReconnectEvent(Event):
 		self.name = "REQUEST RECONNECT Event"
 		self.message = message
 		self.master = master
-		
+
 class RequestDisconnectEvent(Event):
 	def __init__(self, message, master = ""):
 		self.name = "REQUEST DISCONNECT Event"
@@ -232,7 +232,7 @@ class ConnectedEvent(Event):
 		
 class ReloadEvent(Event):
 	def __init__(self):
-		self.name = "RELOAD Event"		
+		self.name = "RELOAD Event"
 		
 class ReloadconfigEvent(Event):
 	def __init__(self, module, master = ""):

@@ -1,0 +1,307 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"_",
+				"_connections"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "Package Control: ",
+		"selected_items":
+		[
+			[
+				"Package Control: ",
+				"Package Control: List Packages"
+			],
+			[
+				"Package Control: l",
+				"Package Control: List Packages"
+			],
+			[
+				"",
+				"Package Control: List Packages"
+			],
+			[
+				"Snippet: ",
+				"Snippet: #!/usr/bin/env"
+			],
+			[
+				"indent",
+				"Indentation: Convert to Spaces"
+			]
+		],
+		"width": 400.0
+	},
+	"console":
+	{
+		"height": 160.0,
+		"history":
+		[
+			"import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)",
+			" import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by) "
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/D/Programmering/IRC/FatbotIRC",
+		"/D/Programmering/IRC/FatbotIRC/core",
+		"/D/Programmering/IRC/FatbotIRC/modules"
+	],
+	"file_history":
+	[
+		"/D/Programmering/IRC/FatbotIRC/modules/responder.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/protocolirc.py",
+		"/D/Programmering/IRC/FatbotIRC/core/output.py",
+		"/D/Programmering/IRC/FatbotIRC/core/eventdispatcher.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/nickserv.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/slimmod.cfg",
+		"/D/Programmering/IRC/FatbotIRC/modules/fatmod.cfg",
+		"/D/Programmering/IRC/FatbotIRC/core/fatcore.cfg",
+		"/D/Programmering/IRC/FatbotIRC/core/slimcore.cfg",
+		"/D/Programmering/IRC/FatbotIRC/Fatbot.bat",
+		"/D/Programmering/IRC/FatbotIRC/Slimbot.bat",
+		"/D/Backup AIDS/Aa backup igen/Backuprar/Backup/Programmering/runpython.bat",
+		"/D/Programmering/IRC/FatbotIRC/modules/Slimbot.bat",
+		"/D/Programmering/IRC/FatbotIRC/modules/Fatbot.bat",
+		"/D/Programmering/IRC/FatbotIRC/core/config.cfg",
+		"/D/Programmering/IRC/FatbotIRC/core/slim.cfg",
+		"/D/Programmering/IRC/FatbotIRC - Slim/core/config.cfg",
+		"/D/Programmering/IRC/FatbotIRC/modules/modules.cfg",
+		"/D/Programmering/IRC/FatbotIRC/moduleloader.py",
+		"/D/Programmering/IRC/FatbotIRC/core/consoleview.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/gamemanager.py",
+		"/C/Users/mAgz/AppData/Roaming/Sublime Text 3/Packages/User/Package Control.sublime-settings",
+		"/D/Programmering/IRC/FatbotIRC/core/__init__.py",
+		"/D/Programmering/IRC/FatbotIRC/core/bot.py",
+		"/D/Programmering/IRC/FatbotIRC/core/connection.py",
+		"/D/Programmering/IRC/FatbotIRC/core/events.py",
+		"/D/Programmering/IRC/FatbotIRC/core/gui.py",
+		"/D/Programmering/IRC/FatbotIRC/core/networkcontroller.py",
+		"/D/Programmering/IRC/FatbotIRC/core/networkmessage.py",
+		"/D/Programmering/IRC/FatbotIRC/core/networkview.py",
+		"/D/Programmering/IRC/FatbotIRC/core/spinner.py",
+		"/D/Programmering/IRC/FatbotIRC/core/weakboundmethod.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/games/__init__.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/games/guessnumber.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/__init__.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/autopinger.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/fridhemauth.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/messageformater.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/oper.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/performer.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/privmsgparser.py",
+		"/D/Programmering/IRC/FatbotIRC/modules/urlparser.py",
+		"/D/Programmering/IRC/FatbotIRC/.gitignore",
+		"/D/Programmering/IRC/FatbotIRC/botinfo.py",
+		"/D/Programmering/IRC/FatbotIRC/External Support",
+		"/D/Programmering/IRC/FatbotIRC/fatbotirc.sublime-project",
+		"/D/Programmering/IRC/FatbotIRC/IDEAS",
+		"/D/Programmering/IRC/FatbotIRC/LICENSE",
+		"/D/Programmering/IRC/FatbotIRC/main.py",
+		"/D/Programmering/IRC/FatbotIRC/README.md",
+		"/D/Programmering/IRC/FatbotIRC/REGEX",
+		"/D/Programmering/IRC/FatbotIRC/TODO",
+		"/C/Users/mAgz/AppData/Local/Temp/pycrypto-2.6.1/README",
+		"/C/Program Files (x86)/mIRC/aliases.ini",
+		"/C/Program Files (x86)/mIRC/readme.txt",
+		"/C/Users/mAgz/AppData/Roaming/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/C/Users/mAgz/AppData/Roaming/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/D/New Folder/test.txt",
+		"/D/New Folder/asdf.txt",
+		"/D/New Folder/Mnemonic.txt",
+		"/C/Users/mAgz/Documents/Hämtningar/VMware Workstation 11.1.0 Build 2496824 Final/Serials.txt",
+		"/D/Programmering/AV-Eslov/UI/Tool/hub-ide-web/data/scripts/app/backend/hardware/hwcomcontroller.js",
+		"/C/Users/mAgz/Documents/Hämtningar/VMware.vCenter.Operations.Manager.Foundation.v5.8.5-NEWiSO/n-vcops585.nfo",
+		"/E/MAGNiTUDE/install.txt",
+		"/D/Nerladdat/Torrents/Klara/Adobe Photoshop CS6 Extended Activation with License (No crack Required)/Adobe.Photoshop.CS6.Keygen/Keygen-X-FORCE/Disable activation/install.txt",
+		"/D/Nerladdat/Torrents/Klara/Adobe Photoshop CS6 Extended Activation with License (No crack Required)/Adobe.Photoshop.CS6.Keygen/_Readme.txt",
+		"/C/Users/mAgz/AppData/Roaming/SumatraPDF/SumatraPDF-settings.txt",
+		"/C/Users/mAgz/Downloads/base64.bin",
+		"/C/Windows/System32/drivers/etc/hosts",
+		"/C/Users/mAgz/.git-credentials",
+		"/D/Juliaskuld.tx",
+		"/C/eula.1033.txt"
+	],
+	"find":
+	{
+		"height": 38.0
+	},
+	"find_in_files":
+	{
+		"height": 90.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"fat",
+			"fatc",
+			"PrintEvent",
+			"[\"modules\"]",
+			"TickEvent",
+			"page_change",
+			"log",
+			"print",
+			"event",
+			"Event",
+			"([.]*Event\\([^.]*?\\))",
+			"([.]*Event\\([^.]*\\))",
+			"([^.]*Event\\([^.]*\\))",
+			"[.]*([^.]*Event\\([^.]*\\))",
+			"[\\s]*([^.]*Event\\([^.]*\\))",
+			"[\\s]*([^.]*Event\\([^.]*\\))/g",
+			"[\\s]*([^.]*Event\\([^.]*\\))",
+			"/[\\s]*([^.]*Event\\([^.]*\\))/",
+			"Searching",
+			"/[\\s]*([^.]*Event\\([^.]*\\))/g",
+			"/[^\\n]*([^.]*Event\\([^.]*\\))/g",
+			"[^\\n]*([^.]*Event\\([^.]*\\))",
+			"[ ]*([^.]*Event\\([^.]*\\))",
+			"[\\s]*([^.]*Event\\([^.]*\\))",
+			"([^.]*Event\\([^.]*\\))",
+			"Event(",
+			"bot_info[\"ed\"].post(self)",
+			").post(self.ed)",
+			"().post(self",
+			"post",
+			"print",
+			"\"modules\", \"",
+			"print",
+			"fileName"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"",
+			"$1.post(self.ed)",
+			")",
+			"\"modules\"][\""
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": false
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 30.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "fatbotirc.sublime-project",
+	"replace":
+	{
+		"height": 56.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 259.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
