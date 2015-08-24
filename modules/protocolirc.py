@@ -15,7 +15,7 @@ limitations under the License.
 """
 # encoding: UTF-8
 import os, sys
-from core.events import ParsedPrivmsgEvent, ReloadconfigEvent, RequestJoinEvent, RequestPartEvent, RequestSendPrivmsgEvent, ReloadconfigEvent, RequestDisconnectEvent, RequestReconnectEvent, RequestSendCommandEvent 
+from core.events import ParsedPrivmsgEvent, ReloadconfigEvent, RequestJoinEvent, RequestPartEvent, RequestSendPrivmsgEvent, ReloadconfigEvent, RequestDisconnectEvent, RequestReconnectEvent, RequestSendCommandEvent
 import ConfigParser
 from core.weakboundmethod import WeakBoundMethod as Wbm
 import os, sys
@@ -26,36 +26,32 @@ from botinfo import bot_info
 class protocolirc():
     def __init__(self, ed):
         self.ed = ed
-        self.respondWho = ""
-        self.respondTo = ""
-        self.respondWhat = ""
-        self.respond = False
         self.read_config()
         self._connections = [
             self.ed.add(ParsedPrivmsgEvent, Wbm(self.parse_privmsg)),
             self.ed.add(ReloadconfigEvent, Wbm(self.reload_config))
         ]
-        
+
     def parse_privmsg(self, event):
         nick, source = event.nick, event.source
         channel, message = event.channel, event.message
-        command, parameters = event.command, event.parameters                
+        command, parameters = event.command, event.parameters
 
         # :Kek!Keke@somekind.ofspecial.mask PRIVMSG Fatbot :Hey
-        if (channel[0] == "#" and command != "fatbot") or " " not in message or not self.is_master(source):  # If no parameters or not master, discard
+        if (channel[0] == "#" and command != self.name.lower()) or " " not in message or not self.is_master(source):  # If no parameters or not master, discard
             return
-        
-        if command == "fatbot" and len(parameters) > 1:
+
+        if command == self.name.lower() and len(parameters) > 1:
             command = parameters[0]
             parameters = parameters[1:]
-        
+
         if command == "join":  # channel
             #self.ed.post(JoinEvent(parameters[0], nick))
             RequestJoinEvent(parameters[0], nick).post(self.ed)
         elif command == "part":  # channel
             #self.ed.post(PartEvent(parameters[0], nick))
             RequestPartEvent(parameters[0], nick).post(self.ed)
-        elif command == "send":  # destination, message
+        elif command == "msg":  # destination, message
             text = ""
             for word in parameters[1:]:
                 text += "%s " % (word, )
@@ -84,7 +80,7 @@ class protocolirc():
             exec(" ".join(parameters))
         elif command == "responder":
             ReloadconfigEvent("responder", parameters).post(self.ed)
-            
+
     def reload_config(self, event):
         if event.module == "protocolirc" or event.module == "all":
             self.read_config()
@@ -94,10 +90,10 @@ class protocolirc():
             if source.lower() == master.lower():
                 return True
         return False
-            
+
     def read_config(self):
         #config = read_config_section(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'), "protocolirc")
         #self.config.read(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'modules.cfg'))
-        config          = bot_info["protocolirc"];
+        config          = bot_info["protocolirc"]
         self.masters    = config["masters"]
-            
+        self.name       = bot_info["General"]["name"]

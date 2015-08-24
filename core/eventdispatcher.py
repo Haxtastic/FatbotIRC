@@ -18,10 +18,10 @@ class Connection:
         self.eventcls = eventcls
         self.listener = listener
         self.ed = ed
-    
+
     def __del__(self):
         self.ed._listeners[self.eventcls].remove(self.listener)
-    
+
 class EventDispatcher:
     """
     This is our EventDispatcher, it sends out events to the listeners who are interested in them.
@@ -39,19 +39,19 @@ class EventDispatcher:
             self.add(events.ReloadconfigEvent, Wbm(self.reload_config))
         ]
         self.read_config()
-        
-    
+
+
     def add(self, eventcls, listener):
         self._listeners.setdefault(eventcls, list()).append(listener)
         return Connection(eventcls, listener, self)
-    
+
     def post(self, event): # Adds a event to the event queue, if the event isn't silent, then print it. Can be called from any thread.
         self.postLock.acquire()
         self.nextQueue.append(event)
         if not event.silent:
-            self.nextQueue.append(events.OutputEvent("Internal", event.name))
+            self.nextQueue.append(events.OutputEvent("Internal", event.discribe()))
         self.postLock.release()
-    
+
     def consume_event_queue(self): # Actually dispatch the events
         self.postLock.acquire()
         eventQueue = self.nextQueue
@@ -72,12 +72,12 @@ class EventDispatcher:
                     #   thread.start_new_thread(listener, (event, ))
             except KeyError:
                 pass # No listener interested in this event
-                
-                
+
+
     def reload_config(self, event):
         if event.module == "eventdispatcher" or event.module == "all":
             self.read_config()
-    
+
     def read_config(self):
         self.tickFreq = bot_info["General"]["tickfreq"]
-                
+

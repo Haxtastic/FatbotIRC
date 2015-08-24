@@ -66,12 +66,19 @@
 	},
 	"expanded_folders":
 	[
-		"/D/Programmering/IRC/FatbotIRC",
-		"/D/Programmering/IRC/FatbotIRC/core",
-		"/D/Programmering/IRC/FatbotIRC/modules"
+		"/home/magz/Programming/FatbotIRC",
+		"/home/magz/Programming/FatbotIRC/core",
+		"/home/magz/Programming/FatbotIRC/modules"
 	],
 	"file_history":
 	[
+		"/home/magz/Programming/FatbotIRC/modules/nickserv.py",
+		"/home/magz/Programming/FatbotIRC/modules/protocolirc.py",
+		"/home/magz/Programming/FatbotIRC/modules/urlparser.py",
+		"/home/magz/Programming/FatbotIRC/modules/slimmod.cfg",
+		"/home/magz/Programming/FatbotIRC/core/gui.py",
+		"/home/magz/Programming/FatbotIRC/modules/messageformater.py",
+		"/home/magz/Programming/FatbotIRC/modules/autopinger.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/responder.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/protocolirc.py",
 		"/D/Programmering/IRC/FatbotIRC/core/output.py",
@@ -147,7 +154,7 @@
 	],
 	"find":
 	{
-		"height": 38.0
+		"height": 31.0
 	},
 	"find_in_files":
 	{
@@ -224,7 +231,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 30.0
+		"height": 31.0
 	},
 	"input":
 	{
@@ -261,7 +268,7 @@
 	"project": "fatbotirc.sublime-project",
 	"replace":
 	{
-		"height": 56.0
+		"height": 58.0
 	},
 	"save_all_on_build": true,
 	"select_file":

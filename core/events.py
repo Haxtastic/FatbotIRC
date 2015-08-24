@@ -23,16 +23,24 @@ class Event:
 	silent = False
 	def __init__(self):
 		self.name = "GENERIC Event"
-		
+
 	def post(self, ed):
 		ed.post(self)
-		
+
+	def discribe(self):
+		discriptions = [a for a in dir(self) if not a.startswith('__') and not callable(getattr(self,a))]
+		text = self.name
+		for disc in discriptions:
+			if disc not in ["description", "name", "silent"]:
+				text += "\n" + str(disc) + ": " + str(getattr(self, disc))
+		return text
+
 class LoginEvent(Event):
 	def __init__(self, username):
 		self.name = "LOGIN Event"
 		self.description = "Sending user/nickname."
 		self.username = username
-		
+
 # REQUEST DONE EVENTS
 
 class JoinEvent(Event):
@@ -42,7 +50,7 @@ class JoinEvent(Event):
 		self.type = "JOIN"
 		self.dest = dest
 		self.master = master
-		
+
 class PartEvent(Event):
 	def __init__(self, source, dest, master = ""):
 		self.name = "PART event"
@@ -50,7 +58,7 @@ class PartEvent(Event):
 		self.type = "PART"
 		self.dest = dest
 		self.master = master
-		
+
 class SendCommandEvent(Event):
 	def __init__(self, type, data, master = ""):
 		self.name = "SEND COMMAND Event"
@@ -65,19 +73,19 @@ class SendPrivmsgEvent(Event):
 		self.dest = dest
 		self.data = data
 		self.master = master
-		
+
 class PongEvent(Event):
 	silent = True
 	def __init__(self, data):
 		self.name = "PONG Event"
 		self.data = data
-		
+
 class DisconnectEvent(Event):
 	def __init__(self, message, master = ""):
 		self.name = "DISCONNECT Event"
 		self.message = message
 		self.master = master
-		
+
 class ReconnectEvent(Event):
 	def __init__(self, message, master = ""):
 		self.name = "RECONNECT Event"
@@ -85,13 +93,13 @@ class ReconnectEvent(Event):
 		self.master = master
 
 # REQUEST EVENTS
-		
+
 class RequestJoinEvent(Event):
 	def __init__(self, channel, master = ""):
 		self.name = "REQUEST JOIN event"
 		self.channel = channel
 		self.master = master
-		
+
 class RequestPartEvent(Event):
 	def __init__(self, channel, master = ""):
 		self.name = "REQUEST PART event"
@@ -104,20 +112,20 @@ class RequestSendPrivmsgEvent(Event):
 		self.dest = dest
 		self.message = message
 		self.master = master
-		
+
 class RequestSendCommandEvent(Event):
 	def __init__(self, type, message, master = ""):
 		self.name = "REQUEST SEND COMMAND Event"
 		self.type = type
 		self.message = message
 		self.master = master
-		
+
 class RequestPongEvent(Event):
 	silent = True
 	def __init__(self, message):
 		self.name = "REQUEST PONG Event"
 		self.message = message
-		
+
 class RequestReconnectEvent(Event):
 	def __init__(self, message, master = ""):
 		self.name = "REQUEST RECONNECT Event"
@@ -130,8 +138,8 @@ class RequestDisconnectEvent(Event):
 		self.message = message
 		self.master = master
 
-# SERVER EVENTS		
-		
+# SERVER EVENTS
+
 class JoinedEvent(Event):
 	def __init__(self, source, type, dest, data):
 		self.name = "JOINED Event"
@@ -139,7 +147,7 @@ class JoinedEvent(Event):
 		self.type = type
 		self.dest = dest
 		self.data = data
-		
+
 class PartedEvent(Event):
 	def __init__(self, source, type, dest, data):
 		self.name = "PARTED Event"
@@ -147,21 +155,21 @@ class PartedEvent(Event):
 		self.type = type
 		self.dest = dest
 		self.data = data
-		
+
 class HosthiddenEvent(Event):
 	def __init__(self, source, dest, data):
 		self.name = "HOSTHIDDEN Event"
 		self.source = source
 		self.dest = dest
 		self.data = data
-		
+
 class NoexistEvent(Event):
 	def __init__(self, source, dest, data):
 		self.name = "NOEXIST Event"
 		self.source = source
 		self.dest = dest
 		self.data = data
-		
+
 class ModeEvent(Event):
 	def __init__(self, source, type, dest, data):
 		self.name = "MODE Event"
@@ -169,7 +177,7 @@ class ModeEvent(Event):
 		self.type = type
 		self.dest = dest
 		self.data = data
-		
+
 class ReginfoEvent(Event):
 	def __init__(self, source, type, dest, data):
 		self.name = "REGINFO Event"
@@ -177,14 +185,14 @@ class ReginfoEvent(Event):
 		self.type = type
 		self.dest = dest
 		self.data = data
-		
+
 class PrivmsgEvent(Event):
 	def __init__(self, source, dest, data):
 		self.name = "PRIVMSG Event"
 		self.source = source
 		self.dest = dest
 		self.data = data
-		
+
 class NoticeEvent(Event):
 	def __init__(self, source, type, dest, data):
 		self.name = "NOTICE Event"
@@ -202,9 +210,9 @@ class ParsedPrivmsgEvent(Event):
 		self.message = message
 		self.command = command
 		self.parameters = parameters
-		
+
 # INTERNAL EVENTS
-		
+
 class OutputEvent(Event):
 	silent=True
 	def __init__(self, origin, text):
@@ -216,7 +224,7 @@ class TickEvent(Event):
 	silent = True
 	def __init__(self):
 		self.name = "TICK Event"
-		
+
 class StartEvent(Event):
 	def __init__(self):
 		self.name = "START Event"
@@ -224,22 +232,22 @@ class StartEvent(Event):
 class QuitEvent(Event):
 	def __init__(self):
 		self.name = "QUIT Event"
-		
+
 class ConnectedEvent(Event):
 	def __init__(self):
 		self.name = "CONNECTED Event"
 		self.description = "Connected to server."
-		
+
 class ReloadEvent(Event):
 	def __init__(self):
 		self.name = "RELOAD Event"
-		
+
 class ReloadconfigEvent(Event):
 	def __init__(self, module, master = ""):
 		self.name = "RELOADCONFIG Event"
 		self.module = module.lower()
 		self.master = master
-		
+
 class WelcomeEvent(Event):
 	def __init__(self, message):
 		self.name = "WELCOME Event"
@@ -250,15 +258,14 @@ class OperEvent(Event):
 	def __init__(self, message):
 		self.name = "OPER Event"
 		self.message = message
-		
+
 class PerformEvent(Event):
 	def __init__(self, message):
 		self.name = "PERFORM Event"
 		self.message = message
-		
+
 class ConnectionClosedEvent(Event):
 	def __init__(self, type):
 		self.name = "CONNECTION CLOSED Event"
 		self.type = type
 
-		
