@@ -15,7 +15,7 @@ limitations under the License.
 """
 #! /usr/bin/env python
 from weakboundmethod import WeakBoundMethod as Wbm
-from events import TickEvent, QuitEvent, StartEvent
+from events import TickEvent, QuitEvent, StartEvent, ReloadconfigEvent
 from bot import Bot
 import time, wx, eventdispatcher
 import os, sys
@@ -29,14 +29,14 @@ class Spinner():
     It consumes the event dispatchers queue and then sleeps for 0.01 seconds to reduce overhead.
     """
     def __init__(self, parameters):
-        fileName, coreFile, moduleFile, GUI = parameters;
-        botinfo.bot_info.update(botinfo.read_config("core", coreFile))
-        botinfo.bot_info.update(botinfo.read_config("modules", moduleFile))
+        fileName, self.coreFile, self.moduleFile, GUI = parameters;
+        self.read_config("all")
         self.ed         = botinfo.bot_info["ed"] = eventdispatcher.EventDispatcher()
         self.alive      = True
         self.bot        = Bot(self.ed)
         self._connection = [
-            self.ed.add(QuitEvent, Wbm(self.quit))
+            self.ed.add(QuitEvent, Wbm(self.quit)),
+            self.ed.add(ReloadconfigEvent, Wbm(self.read_config))
         ]
         self.bot.start()
         
@@ -47,6 +47,10 @@ class Spinner():
         
     def quit(self, event):
         self.alive = False
+        
+    def read_config(self, event):
+        botinfo.bot_info.update(botinfo.read_config("core", self.coreFile))
+        botinfo.bot_info.update(botinfo.read_config("modules", self.moduleFile))
 
 def main(parameters):
     spin = Spinner(parameters)

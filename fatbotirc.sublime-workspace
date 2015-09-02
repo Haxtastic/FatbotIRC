@@ -19,10 +19,14 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 392.0,
-		"last_filter": "Package Control: ",
+		"height": 81.0,
+		"last_filter": "install",
 		"selected_items":
 		[
+			[
+				"install",
+				"Package Control: Install Package"
+			],
 			[
 				"Package Control: ",
 				"Package Control: List Packages"
@@ -66,22 +70,42 @@
 	},
 	"expanded_folders":
 	[
-		"/home/magz/Programming/FatbotIRC",
-		"/home/magz/Programming/FatbotIRC/core",
-		"/home/magz/Programming/FatbotIRC/modules"
+		"/D/Programmering/IRC/FatbotIRC",
+		"/D/Programmering/IRC/FatbotIRC/core",
+		"/D/Programmering/IRC/FatbotIRC/modules"
 	],
 	"file_history":
 	[
-		"/home/magz/Programming/FatbotIRC/modules/nickserv.py",
-		"/home/magz/Programming/FatbotIRC/modules/protocolirc.py",
-		"/home/magz/Programming/FatbotIRC/modules/urlparser.py",
-		"/home/magz/Programming/FatbotIRC/modules/slimmod.cfg",
-		"/home/magz/Programming/FatbotIRC/core/gui.py",
-		"/home/magz/Programming/FatbotIRC/modules/messageformater.py",
-		"/home/magz/Programming/FatbotIRC/modules/autopinger.py",
+		"/C/Program Files (x86)/Mumble/Murmur.ice",
+		"/D/New Folder/test.txt",
+		"/D/Nerladdat/Skype/id.ini",
+		"/D/Nerladdat/FF/settings.ini",
+		"/D/New Folder/asdf.txt",
+		"/D/New Folder/input.ini",
+		"/D/Juliaskuld.txt",
+		"/C/Program Files (x86)/Steam/steamapps/common/ARK/ShooterGame/Saved/Config/WindowsNoEditor/GameUserSettings.ini",
+		"/C/Program Files (x86)/Steam/steamapps/common/ARK/ShooterGame/Saved/Config/WindowsNoEditor/Engine.ini",
+		"/D/Programmering/IRC/FatbotIRC/modules/autopinger.py",
+		"/D/Programmering/IRC/FatbotIRC/core/gui.py",
+		"/D/Programmering/IRC/FatbotIRC/core/spinner.py",
+		"/C/Program Files (x86)/Arduino/lib/preferences.txt",
+		"/C/Program Files (x86)/Steam/steamapps/common/ARK/ShooterGame/Saved/Config/WindowsNoEditor/Game.ini",
+		"/C/Program Files (x86)/Steam/steamapps/common/ARK/ShooterGame/Saved/Config/WindowsNoEditor/Input.ini",
+		"/C/Program Files (x86)/Steam/steamapps/common/ARK/ShooterGame/Saved/Config/WindowsNoEditor/Lightmass.ini",
+		"/C/Program Files (x86)/Steam/steamapps/common/ARK/ShooterGame/Saved/Config/WindowsNoEditor/Scalability.ini",
+		"/C/Program Files (x86)/Steam/steamapps/common/ARK/ShooterGame/Saved/Config/WindowsNoEditor/Compat.ini",
+		"/C/Program Files (x86)/Steam/steamapps/common/ARK/ShooterGame/Saved/Config/WindowsNoEditor/DeviceProfiles.ini",
+		"/C/Program Files (x86)/Steam/steamapps/common/ARK/ShooterGame/Saved/LocalProfiles/PlayerLocalData.arkprofile",
+		"/C/Users/mAgz/Downloads/CoreTemp_106/CoreTemp64/CoreTemp.ini",
+		"/D/Programmering/IRC/FatbotIRC/modules/fridhemauth.py",
+		"/D/Programmering/IRC/FatbotIRC/core/networkview.py",
+		"/D/Programmering/IRC/FatbotIRC/core/output.py",
+		"/D/Programmering/Eclipse workspace/ESLOV_TOOL/.gitignore",
+		"/D/Programmering/Eclipse workspace/ESLOV_TOOL/.classpath",
+		"/C/Program Files (x86)/Java/jdk1.8.0_51/jre/bin/client/Xusage.txt",
+		"/D/Programmering/IRC/FatbotIRC/External Support",
 		"/D/Programmering/IRC/FatbotIRC/modules/responder.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/protocolirc.py",
-		"/D/Programmering/IRC/FatbotIRC/core/output.py",
 		"/D/Programmering/IRC/FatbotIRC/core/eventdispatcher.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/nickserv.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/slimmod.cfg",
@@ -105,17 +129,12 @@
 		"/D/Programmering/IRC/FatbotIRC/core/bot.py",
 		"/D/Programmering/IRC/FatbotIRC/core/connection.py",
 		"/D/Programmering/IRC/FatbotIRC/core/events.py",
-		"/D/Programmering/IRC/FatbotIRC/core/gui.py",
 		"/D/Programmering/IRC/FatbotIRC/core/networkcontroller.py",
 		"/D/Programmering/IRC/FatbotIRC/core/networkmessage.py",
-		"/D/Programmering/IRC/FatbotIRC/core/networkview.py",
-		"/D/Programmering/IRC/FatbotIRC/core/spinner.py",
 		"/D/Programmering/IRC/FatbotIRC/core/weakboundmethod.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/games/__init__.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/games/guessnumber.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/__init__.py",
-		"/D/Programmering/IRC/FatbotIRC/modules/autopinger.py",
-		"/D/Programmering/IRC/FatbotIRC/modules/fridhemauth.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/messageformater.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/oper.py",
 		"/D/Programmering/IRC/FatbotIRC/modules/performer.py",
@@ -123,7 +142,6 @@
 		"/D/Programmering/IRC/FatbotIRC/modules/urlparser.py",
 		"/D/Programmering/IRC/FatbotIRC/.gitignore",
 		"/D/Programmering/IRC/FatbotIRC/botinfo.py",
-		"/D/Programmering/IRC/FatbotIRC/External Support",
 		"/D/Programmering/IRC/FatbotIRC/fatbotirc.sublime-project",
 		"/D/Programmering/IRC/FatbotIRC/IDEAS",
 		"/D/Programmering/IRC/FatbotIRC/LICENSE",
@@ -136,8 +154,6 @@
 		"/C/Program Files (x86)/mIRC/readme.txt",
 		"/C/Users/mAgz/AppData/Roaming/Sublime Text 3/Packages/User/Preferences.sublime-settings",
 		"/C/Users/mAgz/AppData/Roaming/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
-		"/D/New Folder/test.txt",
-		"/D/New Folder/asdf.txt",
 		"/D/New Folder/Mnemonic.txt",
 		"/C/Users/mAgz/Documents/Hämtningar/VMware Workstation 11.1.0 Build 2496824 Final/Serials.txt",
 		"/D/Programmering/AV-Eslov/UI/Tool/hub-ide-web/data/scripts/app/backend/hardware/hwcomcontroller.js",
@@ -154,7 +170,7 @@
 	],
 	"find":
 	{
-		"height": 31.0
+		"height": 38.0
 	},
 	"find_in_files":
 	{
@@ -169,6 +185,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"write",
 			"fat",
 			"fatc",
 			"PrintEvent",
@@ -231,7 +248,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 31.0
+		"height": 30.0
 	},
 	"input":
 	{
@@ -268,7 +285,7 @@
 	"project": "fatbotirc.sublime-project",
 	"replace":
 	{
-		"height": 58.0
+		"height": 56.0
 	},
 	"save_all_on_build": true,
 	"select_file":

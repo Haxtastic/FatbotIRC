@@ -3,7 +3,7 @@ lib_path = os.path.abspath(os.path.join(".."))
 sys.path.append(lib_path)
 import botinfo
 import wx, time, thread, multiprocessing as mp, spinner, re
-from events import QuitEvent, RequestDisconnectEvent, ParsedPrivmsgEvent, Event, JoinEvent, PartEvent, RequestSendPrivmsgEvent
+from events import QuitEvent, RequestDisconnectEvent, ParsedPrivmsgEvent, Event, JoinEvent, PartEvent, RequestSendPrivmsgEvent, ReloadconfigEvent
 from weakboundmethod import WeakBoundMethod as Wbm
 
 
@@ -163,10 +163,12 @@ class FrameWithForms(wx.Frame):
 class GUIWindow(wx.App):
     def __init__(self, parameters):
         self.parameters = parameters
+        self.read_config()
         config = botinfo.bot_info["Connection"];
         self.name = botinfo.bot_info["General"]["name"];
         self.server = "%s%s:%d" % (config["prefix"][1], config["ip"], config["port"][2])
         wx.App.__init__(self, False)
+        
     def OnInit(self):
         self.parent_pipe, self.child_pipe = mp.Pipe()
         self.redirecter = bothandler(self.child_pipe, self.parameters)
@@ -177,6 +179,11 @@ class GUIWindow(wx.App):
         self.frame.Show()
         self.SetTopWindow(self.frame)
         return True
+        
+    def read_config(self):
+        fileName, coreFile, moduleFile, GUI = self.parameters;
+        botinfo.bot_info.update(botinfo.read_config("core", coreFile))
+        botinfo.bot_info.update(botinfo.read_config("modules", moduleFile))
 
     def run(self):
         evtloop = wx.EventLoop()
@@ -200,7 +207,7 @@ class GUIWindow(wx.App):
             self.frame.forms[tab].editname.Bind(wx.EVT_CHAR_HOOK, self.frame.onEnter)#, self.frame.forms[tab])
             self.frame.notebook.AddPage(self.frame.forms[tab], tab.capitalize())
             self.frame.notebook.SendSizeEvent()
-            return False
+            return True
         elif isinstance(event, PartEvent):
             tab = event.dest.lower()
             for index in range(self.frame.notebook.GetPageCount()):
@@ -209,7 +216,9 @@ class GUIWindow(wx.App):
                     self.frame.notebook.DeletePage(index)
                     self.frame.notebook.SendSizeEvent()
                     break
-            #return True
+            return True
+        elif isinstance(event, ReloadconfigEvent):
+            self.read_config()
 
 class bothandler(mp.Process):
 
@@ -223,7 +232,8 @@ class bothandler(mp.Process):
         spin = spinner.Spinner(self.parameters)
         self._con = [
             spin.ed.add(JoinEvent, Wbm(self.write)),
-            spin.ed.add(PartEvent, Wbm(self.write))
+            spin.ed.add(PartEvent, Wbm(self.write)),
+            spin.ed.add(ReloadconfigEvent, Wbm(self.write))
         ]
         while spin.tick():
             if self.pipe.poll():
@@ -239,9 +249,6 @@ class bothandler(mp.Process):
 
 
 def main(parameters):
-    fileName, coreFile, moduleFile, GUI = parameters;
-    botinfo.bot_info.update(botinfo.read_config("core", coreFile))
-    botinfo.bot_info.update(botinfo.read_config("modules", moduleFile))
     GUIWindow(parameters).run()
 
 
